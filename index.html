@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PROGRAM KORBAN 2027 | KRT TAMAN SERI CHINCHIN</title>
+    <style>
+        :root {
+            --primary-color: #065f46; 
+            --secondary-color: #047857;
+            --accent-color: #b45309; 
+            --bg-light: #f0fdf4;
+            --text-dark: #1f2937;
+            --card-bg: #ffffff;
+            --danger-color: #dc2626;
+            --success-color: #16a34a;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
+        body { background-color: var(--bg-light); color: var(--text-dark); padding-bottom: 40px; }
+        
+        header { 
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); 
+            color: white; 
+            padding: 30px 20px; 
+            text-align: center; 
+            border-bottom: 5px solid var(--accent-color);
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        header h1 { cursor: pointer; }
+        
+        .container { max-width: 1200px; margin: 20px auto; padding: 0 15px; }
+        
+        .auth-container {
+            max-width: 450px;
+            margin: 40px auto;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            border-top: 5px solid var(--primary-color);
+        }
+
+        .auth-toggle { display: flex; justify-content: space-around; margin-bottom: 25px; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px; }
+        .auth-toggle button { background: none; border: none; font-size: 1.1rem; font-weight: bold; color: #9ca3af; cursor: pointer; padding: 5px 15px; }
+        .auth-toggle button.active { color: var(--primary-color); border-bottom: 3px solid var(--primary-color); }
+
+        .user-nav { display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 15px 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .btn-logout { background-color: #6b7280; color: white; border: none; padding: 6px 15px; border-radius: 4px; cursor: pointer; font-weight: 600; }
+
+        .intro-card { background: white; border-left: 5px solid var(--accent-color); padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+        .highlight-box { background-color: #fef3c7; color: #92400e; padding: 10px; border-radius: 5px; margin-top: 10px; font-weight: bold; }
+
+        .dashboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
+        .stat-card { background: white; padding: 15px; border-radius: 8px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border-top: 4px solid var(--primary-color); }
+        .stat-card p { font-size: 1.5rem; font-weight: bold; color: var(--primary-color); margin-top: 5px; }
+
+        .main-content { display: grid; grid-template-columns: 1fr 1.3fr; gap: 20px; }
+        @media (max-width: 850px) { .main-content { grid-template-columns: 1fr; } }
+
+        .form-section, .list-section { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .form-section h2, .list-section h2 { color: var(--primary-color); margin-bottom: 15px; border-bottom: 2px solid #e5e7eb; padding-bottom: 5px; }
+        
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; margin-bottom: 4px; font-weight: bold; font-size: 0.9rem; }
+        .form-group input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 1rem; }
+        
+        .btn-submit { background-color: var(--primary-color); color: white; border: none; padding: 12px; font-size: 1rem; font-weight: bold; border-radius: 5px; cursor: pointer; width: 100%; }
+
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 10px; }
+        th { background-color: var(--primary-color); color: white; padding: 10px; text-align: left; }
+        td { padding: 10px; border-bottom: 1px solid #e5e7eb; }
+        
+        .status-lunas { color: var(--success-color); font-weight: bold; }
+        .status-baki { color: var(--danger-color); font-weight: bold; }
+        .empty-msg { text-align: center; color: #9ca3af; padding: 20px; font-style: italic; }
+        .loading-msg { text-align: center; color: var(--accent-color); font-weight: bold; padding: 10px; }
+    </style>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+</head>
+<body>
+
+    <header>
+        <h1 onclick="ketikAdminRahsia()">PROGRAM KORBAN 2027</h1>
+        <p>KRT Taman Seri Chinchin, Jasin, Melaka (TSCC)</p>
+    </header>
+
+    <div class="container">
+
+        <div id="authSection" class="auth-container">
+            <div class="auth-toggle">
+                <button id="toggleLoginBtn" class="active" onclick="tukarTab('login')">Log Masuk</button>
+                <button id="toggleRegisterBtn" onclick="tukarTab('register')">Daftar Akaun</button>
+            </div>
+
+            <div id="loginBox">
+                <div class="form-group">
+                    <label>No. Telefon Pengguna</label>
+                    <input type="text" id="loginUsername" placeholder="Contoh: 0123456789">
+                </div>
+                <div class="form-group">
+                    <label>Kata Laluan</label>
+                    <input type="password" id="loginPassword" placeholder="Masukkan kata laluan">
+                </div>
+                <button type="button" class="btn-submit" onclick="prosesLogMasuk()">Masuk Ke Sistem</button>
+            </div>
+
+            <div id="registerBox" style="display: none;">
+                <div class="form-group">
+                    <label>Nama Penuh</label>
+                    <input type="text" id="regNama" placeholder="Contoh: Ahmad bin Jamil">
+                </div>
+                <div class="form-group">
+                    <label>No. Telefon (ID Log Masuk)</label>
+                    <input type="text" id="regUsername" placeholder="Contoh: 0176543210">
+                </div>
+                <div class="form-group">
+                    <label>Cipta Kata Laluan</label>
+                    <input type="password" id="regPassword" placeholder="Cipta kata laluan baru">
+                </div>
+                <button type="button" class="btn-submit" style="background-color: var(--accent-color);" onclick="prosesDaftarAkaun()">Daftar Akaun Penduduk</button>
+            </div>
+        </div>
+
+        <div id="appDashboardSection" style="display: none;">
+            <div class="user-nav">
+                <div>Warga KRT TSCC: <strong id="namaSesiPengguna">...</strong> [<span id="jenisAksesTeks" style="font-weight:bold; color:var(--accent-color);">Peserta</span>]</div>
+                <button class="btn-logout" onclick="logKeluarSistem()">Log Keluar</button>
+            </div>
+
+            <div class="intro-card">
+                <h2>Satu Bahagian, Seribu Keberkatan</h2>
+                <p>Sila masukkan maklumat penyertaan korban serta resit transaksi untuk semakan pihak jawatankuasa.</p>
+                <div class="highlight-box">💵 1 Bahagian Lembu = RM 800.00</div>
+            </div>
+
+            <div class="dashboard">
+                <div class="stat-card"><h3 id="labelJumlahPeserta">Rekod</h3><p id="total-peserta">0</p></div>
+                <div class="stat-card"><h3>Jumlah Bahagian</h3><p id="total-lembu">0</p></div>
+                <div class="stat-card"><h3>Telah Dibayar</h3><p style="color: var(--success-color);" id="total-bayar">RM 0.00</p></div>
+                <div class="stat-card"><h3>Baki Tunggakan</h3><p style="color: var(--accent-color);" id="total-baki">RM 0.00</p></div>
+            </div>
+
+            <div class="main-content">
+                <div class="form-section" id="boxBorangPendaftaran">
+                    <h2>Borang Rekod Korban</h2>
+                    <div class="form-group"><label>Nama Peserta (Niat Korban/Aqiqah)</label><input type="text" id="namaNiat"></div>
+                    <div class="form-group"><label>Bilangan Bahagian</label><input type="number" id="bilangan" value="1" min="1"></div>
+                    <div class="form-group"><label>No. Rujukan Resit</label><input type="text" id="resit"></div>
+                    <div class="form-group"><label>Amaun Dibayar (RM)</label><input type="number" id="jumlahBayar" value="800"></div>
+                    <button type="button" class="btn-submit" onclick="prosesHantarRekod()">Simpan Rekod Pembayaran</button>
+                </div>
+
+                <div class="list-section" id="boxJadualPaparan">
+                    <h2 id="tajukJadual">Senarai Rekod Pendaftaran</h2>
+                    <div id="loadingStatus" class="loading-msg">Sistem sedia...</div>
+                    <div style="overflow-x: auto;">
+                        <table>
+                            <thead>
+                                <tr><th id="thPemilik">Niat / Peserta</th><th>Bahagian</th><th>Kos (RM)</th><th>Dibayar (RM)</th><th>Status</th></tr>
+                            </thead>
+                            <tbody id="jadualBody"></tbody>
+                        </table>
+                        <div id="emptyMessage" class="empty-msg" style="display:none;">Tiada sebarang rekod dijumpai.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var firebaseConfig = {
+            apiKey: "AIzaSyAsYourApiKeyHere-XXXXXX",
+            authDomain: "korban-tscc.firebaseapp.com",
+            projectId: "korban-tscc",
+            storageBucket: "korban-tscc.appspot.com",
+            messagingSenderId: "1234567890",
+            appId: "1:1234567890:web:abcdef123456"
+        };
+
+        // Semak sambungan Firebase
+        var firebaseBerjaya = false;
+        var db;
+        try {
+            firebase.initializeApp(firebaseConfig);
+            db = firebase.firestore();
+            db.settings({ experimentalForceLongPolling: true });
+            firebaseBerjaya = true;
+        } catch(e) {
+            console.log("Firebase disekat oleh browser. Mod Local Storage diaktifkan.");
+        }
+
+        var s_user = null;
+        var HARGA_BAHAGIAN = 800;
+        var hitunganKlik = 0;
+
+        // Sandaran Simpanan Tempatan (Local Storage Backup) jika internet disekat
+        if(!localStorage.getItem('backup_pengguna')) localStorage.setItem('backup_pengguna', JSON.stringify({}));
+        if(!localStorage.getItem('backup_rekod')) localStorage.setItem('backup_rekod', JSON.stringify([]));
+
+        function ketikAdminRahsia() {
+            if (s_user !== null) return;
+            hitunganKlik++;
+            if (hitunganKlik === 5) {
+                hitunganKlik = 0;
+                s_user = { nama: "Urus Setia KRT TSCC", username: "admin", role: "admin" };
+                alert("Mod Jawatankuasa diaktifkan secara pintas.");
+                bukaDashboardSistem();
+            }
+            setTimeout(function() { hitunganKlik = 0; }, 3000);
+        }
+
+        function tukarTab(tab) {
+            if (tab === 'login') {
+                document.getElementById('loginBox').style.display = 'block';
+                document.getElementById('registerBox').style.display = 'none';
+                document.getElementById('toggleLoginBtn').className = 'active';
+                document.getElementById('toggleRegisterBtn').className = '';
+            } else {
+                document.getElementById('loginBox').style.display = 'none';
+                document.getElementById('registerBox').style.display = 'block';
+                document.getElementById('toggleLoginBtn').className = '';
+                document.getElementById('toggleRegisterBtn').className = 'active';
+            }
+        }
+
+        function prosesDaftarAkaun() {
+            var nama = document.getElementById('regNama').value.trim();
+            var username = document.getElementById('regUsername').value.trim();
+            var kataLuan = document.getElementById('regPassword').value.trim();
+
+            if(!nama || !username || !kataLuan) {
+                alert('Sila penuhi semua maklumat pendaftaran.');
+                return;
+            }
+
+            // Cuba hantar ke Firebase Cloud, jika gagal/offline, simpan dalam Local Phone Storage
+            if (firebaseBerjaya) {
+                db.collection("pengguna_korban").doc(username).get().then(function(docSnap) {
+                    if (docSnap.exists()) {
+                        alert('Ralat: No. telefon ini sudah berdaftar.');
+                    } else {
+                        db.collection("pengguna_korban").doc(username).set({
+                            nama: nama, username: username, kataLuan: kataLuan, role: "peserta"
+                        }).then(function() {
+                            alert('Pendaftaran berjaya disimpan ke Cloud! Sila log masuk.');
+                            tukarTab('login');
+                        });
+                    }
+                }).catch(function() {
+                    daftarLokal(nama, username, kataLuan);
+                });
+            } else {
+                daftarLokal(nama, username, kataLuan);
+            }
+        }
+
+        function daftarLokal(nama, username, kataLuan) {
+            var dataU = JSON.parse(localStorage.getItem('backup_pengguna'));
+            if(dataU[username]) {
+                alert('Ralat: No. telefon ini sudah digunakan.');
+            } else {
+                dataU[username] = { nama: nama, username: username, kataLuan: kataLuan, role: "peserta" };
+                localStorage.setItem('backup_pengguna', JSON.stringify(dataU));
+                alert('Pendaftaran berjaya (Disimpan dalam storan telefon)! Sila log masuk.');
+                tukarTab('login');
+            }
+        }
+
+        function prosesLogMasuk() {
+            var username = document.getElementById('loginUsername').value.trim();
+            var kataLuan = document.getElementById('loginPassword').value.trim();
+
+            if(!username || !kataLuan) {
+                alert('Sila masukkan No. Telefon dan Kata Laluan.');
+                return;
+            }
+
+            if (firebaseBerjaya) {
+                db.collection("pengguna_korban").doc(username).get().then(function(docSnap) {
+                    if (docSnap.exists() && docSnap.data().kataLuan === kataLuan) {
+                        s_user = docSnap.data();
+                        bukaDashboardSistem();
+                    } else {
+                        logMasukLokal(username, kataLuan);
+                    }
+                }).catch(function() {
+                    logMasukLokal(username, kataLuan);
+                });
+            } else {
+                logMasukLokal(username, kataLuan);
+            }
+        }
+
+        function logMasukLokal(username, kataLuan) {
+            var dataU = JSON.parse(localStorage.getItem('backup_pengguna'));
+            if(dataU[username] && dataU[username].kataLuan === kataLuan) {
+                s_user = dataU[username];
+                bukaDashboardSistem();
+            } else {
+                alert('No. Telefon atau Kata Laluan salah.');
+            }
+        }
+
+        function bukaDashboardSistem() {
+            document.getElementById('authSection').style.display = 'none';
+            document.getElementById('appDashboardSection').style.display = 'block';
+            document.getElementById('namaSesiPengguna').innerText = s_user.nama;
+
+            if (s_user.role === 'admin') {
+                document.getElementById('jenisAksesTeks').innerText = 'Admin / Jawatankuasa';
+                document.getElementById('boxBorangPendaftaran').style.display = 'none';
+                document.getElementById('boxJadualPaparan').style.gridColumn = 'span 2';
+            } else {
+                document.getElementById('jenisAksesTeks').innerText = 'Penduduk';
+                document.getElementById('boxBorangPendaftaran').style.display = 'block';
+                document.getElementById('boxJadualPaparan').style.gridColumn = 'span 1';
+            }
+            muatDataSistem();
+        }
+
+        function muatDataSistem() {
+            if (firebaseBerjaya) {
+                db.collection("rekod_korban").orderBy("tarikhCipta", "desc").onSnapshot(function(snapshot) {
+                    var senarai = [];
+                    snapshot.forEach(function(doc) { senarai.push(doc.data()); });
+                    binaJadualPaparan(senarai);
+                }, function() {
+                    muatDataLokal();
+                });
+            } else {
+                muatDataLokal();
+            }
+        }
+
+        function muatDataLokal() {
+            var senarai = JSON.parse(localStorage.getItem('backup_rekod')) || [];
+            // Susun tarikh paling baru di atas
+            senarai.sort(function(a,b){ return b.tarikhCipta - a.tarikhCipta; });
+            binaJadualPaparan(senarai);
+        }
+
+        function binaJadualPaparan(senarai) {
+            document.getElementById('loadingStatus').style.display = 'none';
+            var tbody = document.getElementById('jadualBody');
+            tbody.innerHTML = '';
+
+            var tPeserta = 0, tBahagian = 0, tBayar = 0, tBaki = 0, adaData = false;
+
+            senarai.forEach(function(r) {
+                if (s_user.role !== 'admin' && r.pendaftarPhone !== s_user.username) return;
+
+                adaData = true;
+                tPeserta++;
+                var bil = parseInt(r.bilangan) || 1;
+                var bayar = parseFloat(r.jumlahBayar) || 0;
+                var kos = bil * HARGA_BAHAGIAN;
+                var baki = kos - bayar;
+
+                tBahagian += bil; tBayar += bayar;
+                if(baki > 0) tBaki += baki;
+
+                var statusTeks = baki <= 0 ? '<span class="status-lunas">LUNAS</span>' : '<span class="status-baki">Baki: RM '+baki.toFixed(2)+'</span>';
+                var namaPaparan = s_user.role === 'admin' ? '<strong>'+r.namaNiat+'</strong><br><small style="color:#6b7280;">Oleh: '+r.pendaftarNama+' ('+r.pendaftarPhone+')</small>' : '<strong>'+r.namaNiat+'</strong>';
+
+                tbody.innerHTML += '<tr><td>'+namaPaparan+'</td><td>'+bil+'</td><td>'+kos.toFixed(2)+'</td><td>'+bayar.toFixed(2)+'</td><td>'+statusTeks+'</td></tr>';
+            });
+
+            document.getElementById('emptyMessage').style.display = adaData ? 'none' : 'block';
+            document.getElementById('total-peserta').innerText = tPeserta;
+            document.getElementById('total-lembu').innerText = tBahagian;
+            document.getElementById('total-bayar').innerText = 'RM ' + tBayar.toFixed(2);
+            document.getElementById('total-baki').innerText = 'RM ' + tBaki.toFixed(2);
+        }
+
+        function prosesHantarRekod() {
+            var nama = document.getElementById('namaNiat').value.trim();
+            var bil = document.getElementById('bilangan').value;
+            var resit = document.getElementById('resit').value.trim();
+            var bayar = document.getElementById('jumlahBayar').value;
+
+            if(!nama || !resit) { alert('Sila isi nama peserta dan bukti resit.'); return; }
+
+            var dataBaru = {
+                pendaftarPhone: s_user.username,
+                pendaftarNama: s_user.nama,
+                namaNiat: nama,
+                bilangan: parseInt(bil),
+                resit: resit,
+                jumlahBayar: parseFloat(bayar),
+                tarikhCipta: Date.now()
+            };
+
+            if (firebaseBerjaya) {
+                db.collection("rekod_korban").add(dataBaru).then(function() {
+                    alert('Alhamdulillah! Rekod berjaya disimpan ke Cloud.');
+                    clearBorang();
+                }).catch(function() {
+                    simpanRekodLo
