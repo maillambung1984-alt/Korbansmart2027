@@ -128,7 +128,7 @@
                     <div class="form-group"><label>Bilangan Bahagian</label><input type="number" id="bilangan" value="1" readonly></div>
                     <div class="form-group"><label>No. Rujukan Resit</label><input type="text" id="resit"></div>
                     <div class="form-group"><label>Amaun Dibayar (RM)</label><input type="number" id="jumlahBayar" value="800"></div>
-                    <button onclick="prosesHantarRekor()" class="btn-submit">Simpan Rekod Pembayaran</button>
+                    <button onclick="prosesHantarRekod()" class="btn-submit">Simpan Rekod Pembayaran</button>
                 </div>
 
                 <div class="list-section" id="boxJadualPaparan">
@@ -303,7 +303,7 @@
             document.getElementById('total-baki').innerText = 'RM ' + tBaki.toFixed(2);
         }
 
-        async function prosesHantarRekor() {
+        async function prosesHantarRekod() {
             let nama = document.getElementById('namaNiat').value.trim();
             let resit = document.getElementById('resit').value.trim();
             let bayar = document.getElementById('jumlahBayar').value;
@@ -329,5 +329,21 @@
             }
         }
 
-        async function resetSistemSepenuh
-        
+        async function resetSistemSepenuhnya() {
+            if(confirm("Padam semua data online bersih?")) {
+                global_db = { pengguna: {}, rekod: [] };
+                tetapkanLoading(true);
+                await simpanData();
+                tetapkanLoading(false);
+                logKeluarSistem();
+            }
+        }
+
+        function logKeluarSistem() {
+            s_user = null;
+            document.getElementById('authSectionArea').style.display = 'block';
+            document.getElementById('appDashboardSection').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
