@@ -181,7 +181,7 @@
                 if (!global_db.rekod) global_db.rekod = [];
                 return true;
             } catch(e) {
-                alert("Gagal hubungi server: " + e.message);
+                alert("Gagal hubungi server database: " + e.message);
                 return false;
             }
         }
@@ -241,7 +241,7 @@
             let kataLuan = document.getElementById('loginPassword').value.trim();
 
             if (!username || !kataLuan) {
-                alert("Sila masukkan No. Telefon and Kata Laluan!");
+                alert("Sila masukkan No. Telefon dan Kata Laluan!");
                 return;
             }
 
@@ -269,6 +269,8 @@
         }
 
         function bukaDashboard() {
+            if (!s_user) return;
+            
             document.getElementById('authSectionArea').style.display = 'none';
             document.getElementById('appDashboardSection').style.display = 'block';
             document.getElementById('namaSesiPengguna').innerText = s_user.nama;
@@ -290,67 +292,5 @@
         }
 
         function binaJadual() {
-            let tbody = document.getElementById('jadualBody');
-            tbody.innerHTML = '';
-            
-            let tPeserta = 0, tBahagian = 0, tBayarKeseluruhan = 0, ada = false;
-
-            if (s_user && s_user.role === 'admin') {
-                tPeserta = Object.keys(global_db.pengguna).length;
-                for (let key in global_db.pengguna) {
-                    tBahagian += parseInt(global_db.pengguna[key].bahagian) || 1;
-                }
-            } else if (s_user) {
-                tPeserta = 1;
-                tBahagian = parseInt(s_user.bahagian) || 1;
-            }
-
-            let petaBayaranUser = {};
-            global_db.rekod.forEach(function(r) {
-                let amaun = parseFloat(r.jumlahBayar) || 0;
-                if (!petaBayaranUser[r.pendaftarPhone]) petaBayaranUser[r.pendaftarPhone] = 0;
-                petaBayaranUser[r.pendaftarPhone] += amaun;
-                
-                if (s_user && (s_user.role === 'admin' || r.pendaftarPhone === s_user.username)) {
-                    tBayarKeseluruhan += amaun;
-                }
-            });
-
-            global_db.rekod.forEach(function(r, i) {
-                if (!s_user || (s_user.role !== 'admin' && r.pendaftarPhone !== s_user.username)) return;
-                ada = true;
-
-                let bahagianAsalUser = 1;
-                if (global_db.pengguna[r.pendaftarPhone]) {
-                    bahagianAsalUser = parseInt(global_db.pengguna[r.pendaftarPhone].bahagian) || 1;
-                }
-
-                let totalKosUser = bahagianAsalUser * 800;
-                let totalDahBayarUser = petaBayaranUser[r.pendaftarPhone] || 0;
-                let bakiUser = totalKosUser - totalDahBayarUser;
-                if(bakiUser < 0) bakiUser = 0;
-
-                let statusTeks = bakiUser <= 0 ? '<span class="status-lunas">LUNAS</span>' : '<span class="status-baki">Baki: RM '+bakiUser+'</span>';
-                let nama = s_user.role === 'admin' ? '<strong>'+r.namaNiat+'</strong><br><small>Oleh: '+r.pendaftarNama+' ('+r.pendaftarPhone+')</small>' : '<strong>'+r.namaNiat+'</strong>';
-                let aksi = s_user.role === 'admin' ? '<td><button onclick="padamRekod('+i+')" style="background:red; color:white; border:none; padding:2px 5px; cursor:pointer;">X</button></td>' : '';
-
-                tbody.innerHTML += '<tr><td>'+nama+'</td><td>'+bahagianAsalUser+'</td><td>'+totalKosUser.toFixed(2)+'</td><td>'+(parseFloat(r.jumlahBayar)||0).toFixed(2)+'</td><td>'+statusTeks+'</td>'+aksi+'</tr>';
-            });
-
-            let tKosKeseluruhan = tBahagian * 800;
-            let tBakiKeseluruhan = tKosKeseluruhan - tBayarKeseluruhan;
-            if (tBakiKeseluruhan < 0) tBakiKeseluruhan = 0;
-
-            document.getElementById('emptyMessage').style.display = ada ? 'none' : 'block';
-            document.getElementById('total-peserta').innerText = tPeserta;
-            document.getElementById('total-lembu').innerText = tBahagian;
-            document.getElementById('total-bayar').innerText = 'RM ' + tBayarKeseluruhan.toFixed(2);
-            document.getElementById('total-baki').innerText = 'RM ' + tBakiKeseluruhan.toFixed(2);
-        }
-
-        async function prosesHantarRekod() {
-            let nama = document.getElementById('namaNiat').value.trim();
-            let resit = document.getElementById('resit').value.trim();
-            let bayar = document.getElementById('jumlahBayar').value;
-
-            if(!nama 
+            if (!s_user)
+        
