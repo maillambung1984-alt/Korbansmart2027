@@ -43,8 +43,7 @@
         table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 10px; }
         th { background-color: var(--primary-color); color: white; padding: 10px; text-align: left; }
         td { padding: 10px; border-bottom: 1px solid #e5e7eb; }
-        .status-lunas { color: var(--success-color); font-weight: bold; }
-        .status-baki { color: var(--danger-color); font-weight: bold; }
+        .status-info { color: #4b5563; font-weight: normal; }
         .empty-msg { text-align: center; color: #9ca3af; padding: 20px; font-style: italic; }
         .loading-overlay { display:none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.9); z-index:9999; justify-content:center; align-items:center; font-weight:bold; color:var(--primary-color); text-align:center; }
     </style>
@@ -106,7 +105,7 @@
 
             <div class="intro-card">
                 <h2>Satu Bahagian, Seribu Keberkatan</h2>
-                <div class="highlight-box">💵 1 Bahagian Lembu = RM 800.00</div>
+                <div class="highlight-box">💵 1 Bahagian Lembu = RM 800.00 (Tetap Semak)</div>
                 <div class="bank-info">
                     <strong>🏦 MAKLUMAT PEMBAYARAN:</strong><br>
                     MAYBANK | KRT TSCC | 5510 8942 4735<br>
@@ -115,7 +114,7 @@
             </div>
 
             <div class="dashboard">
-                <div class="stat-card"><h3>Rekod</h3><p id="total-peserta">0</p></div>
+                <div class="stat-card"><h3>Jumlah Peserta</h3><p id="total-peserta">0</p></div>
                 <div class="stat-card"><h3>Jumlah Bahagian</h3><p id="total-lembu">0</p></div>
                 <div class="stat-card"><h3>Telah Dibayar</h3><p style="color: var(--success-color);" id="total-bayar">RM 0.00</p></div>
                 <div class="stat-card"><h3>Baki Tunggakan</h3><p style="color: var(--accent-color);" id="total-baki">RM 0.00</p></div>
@@ -123,24 +122,23 @@
 
             <div class="main-content">
                 <div class="form-section" id="boxBorangPendaftaran">
-                    <h2>Borang Rekod Korban</h2>
-                    <div class="form-group"><label>Nama Peserta (Niat)</label><input type="text" id="namaNiat"></div>
-                    <div class="form-group"><label>Bilangan Bahagian</label><input type="number" id="bilangan" value="1" readonly></div>
-                    <div class="form-group"><label>No. Rujukan Resit</label><input type="text" id="resit"></div>
-                    <div class="form-group"><label>Amaun Dibayar (RM)</label><input type="number" id="jumlahBayar" value="800"></div>
+                    <h2>Borang Simpan Resit Bayaran</h2>
+                    <div class="form-group"><label>Nama Peserta (Niat Korban)</label><input type="text" id="namaNiat" placeholder="Nama untuk niat sembelihan"></div>
+                    <div class="form-group"><label>No. Rujukan Resit Bank</label><input type="text" id="resit" placeholder="Contoh: M2401827..."></div>
+                    <div class="form-group"><label>Amaun Bayaran Kali Ini (RM)</label><input type="number" id="jumlahBayar" value="800"></div>
                     <button onclick="prosesHantarRekod()" class="btn-submit">Simpan Rekod Pembayaran</button>
                 </div>
 
                 <div class="list-section" id="boxJadualPaparan">
-                    <h2>Senarai Rekod Pendaftaran</h2>
+                    <h2>Senarai Transaksi Bayaran</h2>
                     <div style="overflow-x: auto;">
                         <table>
                             <thead>
-                                <tr><th>Niat / Peserta</th><th>Bahagian</th><th>Kos (RM)</th><th>Dibayar (RM)</th><th>Status</th><th id="thAdminAction" style="display:none;">Padam</th></tr>
+                                <tr><th>Niat Korban</th><th>No. Resit</th><th>Amaun Dibayar (RM)</th><th id="thAdminAction" style="display:none;">Padam</th></tr>
                             </thead>
                             <tbody id="jadualBody"></tbody>
                         </table>
-                        <div id="emptyMessage" class="empty-msg" style="display:none;">Tiada sebarang rekod.</div>
+                        <div id="emptyMessage" class="empty-msg" style="display:none;">Tiada sebarang rekod transaksi pembayaran lagi.</div>
                     </div>
                 </div>
             </div>
@@ -280,31 +278,44 @@
         function binaJadual() {
             let tbody = document.getElementById('jadualBody');
             tbody.innerHTML = '';
-            let tPeserta = 0, tBahagian = 0, tBayar = 0, tBaki = 0, ada = false;
+            
+            let senaraiUser = Object.keys(global_db.pengguna);
+            let bilPeserta = 0;
+
+            if (s_user.role === 'admin') {
+                bilPeserta = senaraiUser.length;
+            } else {
+                if (global_db.pengguna[s_user.username]) {
+                    bilPeserta = 1;
+                }
+            }
+
+            let totalBahagian = bilPeserta; 
+            let totalKosKeseluruhan = totalBahagian * 800; 
+            let totalTelahBayar = 0;
+            let adaRekod = false;
 
             global_db.rekod.forEach(function(r, i) {
                 if (s_user.role !== 'admin' && r.pendaftarPhone !== s_user.username) return;
-                ada = true; tPeserta++;
+                adaRekod = true;
                 
-                let bayar = parseFloat(r.jumlahBayar) || 0;
-                let baki = 800 - bayar;
-                
-                tBahagian += 1; // TETAP KEKAL 1 BAHAGIAN SAHAJA
-                tBayar += bayar; 
-                if(baki > 0) tBaki += baki;
+                let amaunBayar = parseFloat(r.jumlahBayar) || 0;
+                totalTelahBayar += amaunBayar;
 
-                let status = baki <= 0 ? '<span class="status-lunas">LUNAS</span>' : '<span class="status-baki">Baki: RM '+baki+'</span>';
-                let nama = s_user.role === 'admin' ? '<strong>'+r.namaNiat+'</strong><br><small>Oleh: '+r.pendaftarNama+' ('+r.pendaftarPhone+')</small>' : '<strong>'+r.namaNiat+'</strong>';
-                let aksi = s_user.role === 'admin' ? '<td><button onclick="padamRekod('+i+')" style="background:red; color:white; border:none; padding:2px 5px; cursor:pointer;">X</button></td>' : '';
+                let namaPaparan = s_user.role === 'admin' ? '<strong>'+r.namaNiat+'</strong><br><small>Oleh: '+r.pendaftarNama+' ('+r.pendaftarPhone+')</small>' : '<strong>'+r.namaNiat+'</strong>';
+                let aksiAdmin = s_user.role === 'admin' ? '<td><button onclick="padamRekod('+i+')" style="background:red; color:white; border:none; padding:2px 5px; cursor:pointer;">X</button></td>' : '';
 
-                tbody.innerHTML += '<tr><td>'+nama+'</td><td>1</td><td>800.00</td><td>'+bayar.toFixed(2)+'</td><td>'+status+'</td>'+aksi+'</tr>';
+                tbody.innerHTML += '<tr><td>'+namaPaparan+'</td><td>'+r.resit+'</td><td>'+amaunBayar.toFixed(2)+'</td>'+aksiAdmin+'</tr>';
             });
 
-            document.getElementById('emptyMessage').style.display = ada ? 'none' : 'block';
-            document.getElementById('total-peserta').innerText = tPeserta;
-            document.getElementById('total-lembu').innerText = tBahagian;
-            document.getElementById('total-bayar').innerText = 'RM ' + tBayar.toFixed(2);
-            document.getElementById('total-baki').innerText = 'RM ' + tBaki.toFixed(2);
+            let totalBakiTunggakan = totalKosKeseluruhan - totalTelahBayar;
+            if(totalBakiTunggakan < 0) totalBakiTunggakan = 0;
+
+            document.getElementById('emptyMessage').style.display = adaRekod ? 'none' : 'block';
+            document.getElementById('total-peserta').innerText = bilPeserta;
+            document.getElementById('total-lembu').innerText = totalBahagian;
+            document.getElementById('total-bayar').innerText = 'RM ' + totalTelahBayar.toFixed(2);
+            document.getElementById('total-baki').innerText = 'RM ' + totalBakiTunggakan.toFixed(2);
         }
 
         async function prosesHantarRekod() {
@@ -312,19 +323,19 @@
             let resit = document.getElementById('resit').value.trim();
             let bayar = document.getElementById('jumlahBayar').value;
 
-            if(!nama || !resit) { alert("Sila lengkapkan nama peserta & rujukan resit!"); return; }
+            if(!nama || !resit || !bayar) { alert("Sila lengkapkan semua maklumat bayaran!"); return; }
 
             global_db.rekod.push({ pendaftarPhone: s_user.username, pendaftarNama: s_user.nama, namaNiat: nama, resit: resit, jumlahBayar: parseFloat(bayar) });
             tetapkanLoading(true);
             await simpanData();
             tetapkanLoading(false);
-            alert("Rekod berjaya dihantar ke server online!");
+            alert("Rekod bayaran berjaya dihantar!");
             document.getElementById('namaNiat').value = ''; document.getElementById('resit').value = '';
             binaJadual();
         }
 
         async function padamRekod(i) {
-            if(confirm("Padam rekod ini?")) {
+            if(confirm("Padam rekod transaksi ini?")) {
                 global_db.rekod.splice(i, 1);
                 tetapkanLoading(true);
                 await simpanData();
@@ -350,5 +361,5 @@
         }
     </script>
 </body>
-    </html>
-    
+                                </html>
+                                
