@@ -354,4 +354,43 @@
             let resit = document.getElementById('resit').value.trim();
             let bayar = document.getElementById('jumlahBayar').value;
 
+            if(!nama || !resit) { alert("Sila lengkapkan nama peserta & rujukan resit!"); return; }
+
+            global_db.rekod.push({ pendaftarPhone: s_user.username, pendaftarNama: s_user.nama, namaNiat: nama, resit: resit, jumlahBayar: parseFloat(bayar) });
+            tetapkanLoading(true);
+            await simpanData();
+            tetapkanLoading(false);
+            alert("Rekod berjaya dihantar ke server online!");
+            document.getElementById('namaNiat').value = ''; document.getElementById('resit').value = '';
+            binaJadual();
+        }
+
+        async function padamRekod(i) {
+            if(confirm("Padam rekod ini?")) {
+                global_db.rekod.splice(i, 1);
+                tetapkanLoading(true);
+                await simpanData();
+                tetapkanLoading(false);
+                binaJadual();
+            }
+        }
+
+        async function resetSistemSepenuhnya() {
+            if(confirm("Padam semua data online bersih?")) {
+                global_db = { pengguna: {}, rekod: [] };
+                tetapkanLoading(true);
+                await simpanData();
+                tetapkanLoading(false);
+                logKeluarSistem();
+            }
+        }
+
+        function logKeluarSistem() {
+            s_user = null;
+            document.getElementById('authSectionArea').style.display = 'block';
+            document.getElementById('appDashboardSection').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
                         
