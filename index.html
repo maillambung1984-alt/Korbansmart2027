@@ -255,14 +255,14 @@
         function binaJadual() {
             var tbody = document.getElementById('jadualBody');
             tbody.innerHTML = '';
-            var tPeserta = 0, tBahagian = 0, tBayar = 0, ada = false;
+            var tPeserta = 0,tBayar = 0, ada = false;
 
             global_db.rekod.forEach(function(r, i) {
                 if (s_user.role !== 'admin' && r.pendaftarPhone !== s_user.username) return;
                 ada = true; 
                 tPeserta++;
                 
-                var bilBahagian = parseInt(r.bilanganBahagian) || 0;
+                
                 var bayar = parseFloat(r.jumlahBayar) || 0;
                 
                 
