@@ -175,6 +175,7 @@
     </div>
 
     <script>
+        // Sila pastikan DB_URL dan MASTER_KEY ini adalah yang betul dari akaun JSONBin anda!
         const DB_URL = "https://api.jsonbin.io/v3/b/6a0be261ee5a733b12e14189";
         const MASTER_KEY = "$2a$10$NZfgT1Nwuo6UgbzD/xgb4OGT9Fc0yX6BVfJX6VvLS8JhVCdQrn5sO";
         
@@ -196,12 +197,15 @@
                 });
                 if(res.ok) {
                     localData = await res.json();
+                    if(!localData || typeof localData !== 'object') localData = { pengguna: {}, rekod: [] };
                     if(!localData.pengguna) localData.pengguna = {};
                     if(!localData.rekod) localData.rekod = [];
                     return true;
+                } else {
+                    alert("ERROR API: Gagal membaca data. URL Bin atau Master Key berkemungkinan salah/mati!");
                 }
             } catch (e) {
-                alert("Ralat sistem database: " + e.message);
+                alert("Ralat sambungan internet/database: " + e.message);
             }
             return false;
         }
@@ -213,6 +217,7 @@
                     headers: { "Content-Type": "application/json", "X-Master-Key": MASTER_KEY },
                     body: JSON.stringify(localData)
                 });
+                if(!res.ok) alert("ERROR API: Gagal menyimpan data online!");
                 return res.ok;
             } catch (e) {
                 alert("Gagal mengemaskini data online: " + e.message);
@@ -261,9 +266,9 @@
             if(user === 'admin' && pass === 'admin') {
                 currentUser = { nama: "Urus Setia KRT TSCC", user: "admin", role: "admin" };
                 document.getElementById('loadingAuth').style.display = 'block';
-                await dapatkanDatabase();
+                let sedia = await dapatkanDatabase();
                 document.getElementById('loadingAuth').style.display = 'none';
-                bukaDashboard();
+                if(sedia) bukaDashboard();
                 return;
             }
 
@@ -304,6 +309,7 @@
 
         function binaJadual() {
             let tbody = document.getElementById('jadualBody');
+            if(!tbody) return;
             tbody.innerHTML = '';
 
             let totalPeserta = 0, totalBahagian = 0, totalBayar = 0, adaData = false;
@@ -319,49 +325,41 @@
             }
 
             let kiraBayarUser = {};
-            localData.rekod.forEach(r => {
-                let amaun = parseFloat(r.jumlahBayar) || 0;
-                if(!kiraBayarUser[r.pendaftarPhone]) kiraBayarUser[r.pendaftarPhone] = 0;
-                kiraBayarUser[r.pendaftarPhone] += amaun;
+            if(Array.isArray(localData.rekod)) {
+                localData.rekod.forEach(r => {
+                    if(r && r.pendaftarPhone) {
+                        let amaun = parseFloat(r.jumlahBayar) || 0;
+                        if(!kiraBayarUser[r.pendaftarPhone]) kiraBayarUser[r.pendaftarPhone] = 0;
+                        kiraBayarUser[r.pendaftarPhone] += amaun;
 
-                if(currentUser.role === 'admin' || r.pendaftarPhone === currentUser.user) {
-                    totalBayar += amaun;
-                }
-            });
+                        if(currentUser.role === 'admin' || r.pendaftarPhone === currentUser.user) {
+                            totalBayar += amaun;
+                        }
+                    }
+                });
 
-            localData.rekod.forEach((r, index) => {
-                if(currentUser.role !== 'admin' && r.pendaftarPhone !== currentUser.user) return;
-                adaData = true;
+                localData.rekod.forEach((r, index) => {
+                    if(!r || (currentUser.role !== 'admin' && r.pendaftarPhone !== currentUser.user)) return;
+                    adaData = true;
 
-                let bahagianUser = 1;
-                if(localData.pengguna[r.pendaftarPhone]) {
-                    bahagianUser = parseInt(localData.pengguna[r.pendaftarPhone].bahagian) || 1;
-                }
+                    let bahagianUser = 1;
+                    if(localData.pengguna[r.pendaftarPhone]) {
+                        bahagianUser = parseInt(localData.pengguna[r.pendaftarPhone].bahagian) || 1;
+                    }
 
-                let kosWajib = bahagianUser * 800;
-                let sudahBayar = kiraBayarUser[r.pendaftarPhone] || 0;
-                let baki = kosWajib - sudahBayar;
-                if(baki < 0) baki = 0;
+                    let kosWajib = bahagianUser * 800;
+                    let sudahBayar = kiraBayarUser[r.pendaftarPhone] || 0;
+                    let baki = kosWajib - sudahBayar;
+                    if(baki < 0) baki = 0;
 
-                let statusLabel = baki <= 0 ? '<span class="status-lunas">LUNAS</span>' : '<span class="status-baki">Baki: RM ' + baki + '</span>';
-                let namaKolum = currentUser.role === 'admin' ? '<strong>' + r.namaNiat + '</strong><br><small>Oleh: ' + r.pendaftarNama + ' (' + r.pendaftarPhone + ')</small>' : '<strong>' + r.namaNiat + '</strong>';
-                let aksiKolum = currentUser.role === 'admin' ? '<td><button onclick="padamRekod(' + index + ')" style="background:red; color:white; border:none; padding:2px 6px; cursor:pointer; border-radius:3px;">X</button></td>' : '';
+                    let statusLabel = baki <= 0 ? '<span class="status-lunas">LUNAS</span>' : '<span class="status-baki">Baki: RM ' + baki + '</span>';
+                    let namaKolum = currentUser.role === 'admin' ? '<strong>' + r.namaNiat + '</strong><br><small>Oleh: ' + r.pendaftarNama + ' (' + r.pendaftarPhone + ')</small>' : '<strong>' + r.namaNiat + '</strong>';
+                    let aksiKolum = currentUser.role === 'admin' ? '<td><button onclick="padamRekod(' + index + ')" style="background:red; color:white; border:none; padding:2px 6px; cursor:pointer; border-radius:3px;">X</button></td>' : '';
 
-                tbody.innerHTML += '<tr><td>' + namaKolum + '</td><td>' + bahagianUser + '</td><td>' + kosWajib.toFixed(2) + '</td><td>' + (parseFloat(r.jumlahBayar) || 0).toFixed(2) + '</td><td>' + statusLabel + '</td>' + aksiKolum + '</tr>';
-            });
+                    tbody.innerHTML += '<tr><td>' + namaKolum + '</td><td>' + bahagianUser + '</td><td>' + kosWajib.toFixed(2) + '</td><td>' + (parseFloat(r.jumlahBayar) || 0).toFixed(2) + '</td><td>' + statusLabel + '</td>' + aksiKolum + '</tr>';
+                });
+            }
 
             let totalKosWajib = totalBahagian * 800;
             let totalBakiTunggakan = totalKosWajib - totalBayar;
-            if(totalBakiTunggakan < 0) totalBakiTunggakan = 0;
-
-            document.getElementById('emptyMsg').style.display = adaData ? 'none' : 'block';
-            document.getElementById('stat-peserta').innerText = totalPeserta;
-            document.getElementById('stat-bahagian').innerText = totalBahagian;
-            document.getElementById('stat-bayar').innerText = 'RM ' + totalBayar.toFixed(2);
-            document.getElementById('stat-baki').innerText = 'RM ' + totalBakiTunggakan.toFixed(2);
-        }
-
-        async function hantarRekod() {
-            let niat = document.getElementById('namaNiat').value.trim();
-            let resit = document.getElementById('resit').value.trim();
-            let bayar = document.getElementById('jumlah
+            
