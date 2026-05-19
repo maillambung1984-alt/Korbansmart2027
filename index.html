@@ -285,15 +285,28 @@
             global_db.rekod.forEach(function(r, i) {
                 if (s_user.role !== 'admin' && r.pendaftarPhone !== s_user.username) return;
                 ada = true; tPeserta++;
+                
                 let bayar = parseFloat(r.jumlahBayar) || 0;
-                let baki = 800 - bayar;
-                tBahagian += 1; tBayar += bayar; if(baki > 0) tBaki += baki;
+                
+                // PENGIRAAN ADAPTIF BERDASARKAN AMAUN BAYARAN
+                let kiraBahagian = 1;
+                let kosSebenar = 800;
+                
+                if (bayar > 800) {
+                    kiraBahagian = Math.ceil(bayar / 800);
+                    kosSebenar = kiraBahagian * 800;
+                }
+                
+                let baki = kosSebenar - bayar;
+                tBahagian += kiraBahagian; 
+                tBayar += bayar; 
+                if(bki = baki) tBaki += baki;
 
                 let status = baki <= 0 ? '<span class="status-lunas">LUNAS</span>' : '<span class="status-baki">Baki: RM '+baki+'</span>';
                 let nama = s_user.role === 'admin' ? '<strong>'+r.namaNiat+'</strong><br><small>Oleh: '+r.pendaftarNama+' ('+r.pendaftarPhone+')</small>' : '<strong>'+r.namaNiat+'</strong>';
                 let aksi = s_user.role === 'admin' ? '<td><button onclick="padamRekod('+i+')" style="background:red; color:white; border:none; padding:2px 5px; cursor:pointer;">X</button></td>' : '';
 
-                tbody.innerHTML += '<tr><td>'+nama+'</td><td>1</td><td>800.00</td><td>'+bayar.toFixed(2)+'</td><td>'+status+'</td>'+aksi+'</tr>';
+                tbody.innerHTML += '<tr><td>'+nama+'</td><td>'+kiraBahagian+'</td><td>'+kosSebenar.toFixed(2)+'</td><td>'+bayar.toFixed(2)+'</td><td>'+status+'</td>'+aksi+'</tr>';
             });
 
             document.getElementById('emptyMessage').style.display = ada ? 'none' : 'block';
@@ -347,3 +360,5 @@
     </script>
 </body>
 </html>
+
+                
