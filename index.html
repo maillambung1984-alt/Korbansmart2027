@@ -230,7 +230,6 @@
                 alert("Alhamdulillah, Akaun Berjaya Didaftarkan! Sila gunakan borang atas untuk Log Masuk.");
                 document.getElementById('regNama').value = '';
                 document.getElementById('regUsername').value = '';
-                document.getElementById('regBahagian').value = '1';
                 document.getElementById('regPassword').value = '';
             } else {
                 alert("Gagal menyimpan akaun baru ke database.");
@@ -296,12 +295,12 @@
             
             let tPeserta = 0, tBahagian = 0, tBayarKeseluruhan = 0, ada = false;
 
-            if (s_user.role === 'admin') {
+            if (s_user && s_user.role === 'admin') {
                 tPeserta = Object.keys(global_db.pengguna).length;
                 for (let key in global_db.pengguna) {
                     tBahagian += parseInt(global_db.pengguna[key].bahagian) || 1;
                 }
-            } else {
+            } else if (s_user) {
                 tPeserta = 1;
                 tBahagian = parseInt(s_user.bahagian) || 1;
             }
@@ -312,13 +311,13 @@
                 if (!petaBayaranUser[r.pendaftarPhone]) petaBayaranUser[r.pendaftarPhone] = 0;
                 petaBayaranUser[r.pendaftarPhone] += amaun;
                 
-                if (s_user.role === 'admin' || r.pendaftarPhone === s_user.username) {
+                if (s_user && (s_user.role === 'admin' || r.pendaftarPhone === s_user.username)) {
                     tBayarKeseluruhan += amaun;
                 }
             });
 
             global_db.rekod.forEach(function(r, i) {
-                if (s_user.role !== 'admin' && r.pendaftarPhone !== s_user.username) return;
+                if (!s_user || (s_user.role !== 'admin' && r.pendaftarPhone !== s_user.username)) return;
                 ada = true;
 
                 let bahagianAsalUser = 1;
@@ -354,43 +353,4 @@
             let resit = document.getElementById('resit').value.trim();
             let bayar = document.getElementById('jumlahBayar').value;
 
-            if(!nama || !resit) { alert("Sila lengkapkan nama peserta & rujukan resit!"); return; }
-
-            global_db.rekod.push({ pendaftarPhone: s_user.username, pendaftarNama: s_user.nama, namaNiat: nama, resit: resit, jumlahBayar: parseFloat(bayar) });
-            tetapkanLoading(true);
-            await simpanData();
-            tetapkanLoading(false);
-            alert("Rekod berjaya dihantar ke server online!");
-            document.getElementById('namaNiat').value = ''; document.getElementById('resit').value = '';
-            binaJadual();
-        }
-
-        async function padamRekod(i) {
-            if(confirm("Padam rekod ini?")) {
-                global_db.rekod.splice(i, 1);
-                tetapkanLoading(true);
-                await simpanData();
-                tetapkanLoading(false);
-                binaJadual();
-            }
-        }
-
-        async function resetSistemSepenuhnya() {
-            if(confirm("Padam semua data online bersih?")) {
-                global_db = { pengguna: {}, rekod: [] };
-                tetapkanLoading(true);
-                await simpanData();
-                tetapkanLoading(false);
-                logKeluarSistem();
-            }
-        }
-
-        function logKeluarSistem() {
-            s_user = null;
-            document.getElementById('authSectionArea').style.display = 'block';
-            document.getElementById('appDashboardSection').style.display = 'none';
-        }
-    </script>
-</body>
-</html>
-                        
+            if(!nama 
