@@ -189,5 +189,169 @@
         async function simpanData() {
             try {
                 let r = await fetch(DB_URL, {
-                    method: 'PUT
-        
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'X-Master-Key': MASTER_KEY },
+                    body: JSON.stringify(global_db)
+                });
+                return r.ok;
+            } catch(e) {
+                alert("Gagal simpan ke server: " + e.message);
+                return false;
+            }
+        }
+
+        async function prosesDaftarAkaun() {
+            let nama = document.getElementById('regNama').value.trim();
+            let username = document.getElementById('regUsername').value.trim();
+            let bahagian = parseInt(document.getElementById('regBahagian').value) || 1;
+            let kataLuan = document.getElementById('regPassword').value.trim();
+
+            if (!nama || !username || !kataLuan) {
+                alert("Sila isi semua ruang pendaftaran!");
+                return;
+            }
+
+            tetapkanLoading(true);
+            let sedia = await muatData();
+            if (!sedia) { tetapkanLoading(false); return; }
+
+            if (global_db.pengguna[username]) {
+                alert("No. telefon ini sudah terdaftar!");
+                tetapkanLoading(false);
+                return;
+            }
+
+            global_db.pengguna[username] = { nama: nama, username: username, kataLuan: kataLuan, bahagian: bahagian, role: "peserta" };
+            
+            let jaya = await simpanData();
+            tetapkanLoading(false);
+
+            if (jaya) {
+                alert("Alhamdulillah, Akaun Berjaya Didaftarkan! Sila gunakan borang atas untuk Log Masuk.");
+                document.getElementById('regNama').value = '';
+                document.getElementById('regUsername').value = '';
+                document.getElementById('regBahagian').value = '1';
+                document.getElementById('regPassword').value = '';
+            } else {
+                alert("Gagal menyimpan akaun baru ke database.");
+            }
+        }
+
+        async function prosesLogMasuk() {
+            let username = document.getElementById('loginUsername').value.trim();
+            let kataLuan = document.getElementById('loginPassword').value.trim();
+
+            if (!username || !kataLuan) {
+                alert("Sila masukkan No. Telefon and Kata Laluan!");
+                return;
+            }
+
+            if (username === 'admin' && kataLuan === 'admin') {
+                s_user = { nama: "Urus Setia KRT TSCC", username: "admin", role: "admin" };
+                tetapkanLoading(true);
+                await muatData();
+                tetapkanLoading(false);
+                bukaDashboard();
+                return;
+            }
+
+            tetapkanLoading(true);
+            let sedia = await muatData();
+            tetapkanLoading(false);
+
+            if (!sedia) return;
+
+            if (global_db.pengguna[username] && global_db.pengguna[username].kataLuan === kataLuan) {
+                s_user = global_db.pengguna[username];
+                bukaDashboard();
+            } else {
+                alert("No. Telefon atau Kata Laluan anda salah!");
+            }
+        }
+
+        function bukaDashboard() {
+            document.getElementById('authSectionArea').style.display = 'none';
+            document.getElementById('appDashboardSection').style.display = 'block';
+            document.getElementById('namaSesiPengguna').innerText = s_user.nama;
+
+            if (s_user.role === 'admin') {
+                document.getElementById('jenisAksesTeks').innerText = 'Admin / Urus Setia';
+                document.getElementById('boxBorangPendaftaran').style.display = 'none';
+                document.getElementById('boxJadualPaparan').style.gridColumn = 'span 2';
+                document.getElementById('boxAdminReset').style.display = 'flex';
+                document.getElementById('thAdminAction').style.display = 'table-cell';
+            } else {
+                document.getElementById('jenisAksesTeks').innerText = 'Peserta Korban';
+                document.getElementById('boxBorangPendaftaran').style.display = 'block';
+                document.getElementById('boxJadualPaparan').style.gridColumn = 'span 1';
+                document.getElementById('boxAdminReset').style.display = 'none';
+                document.getElementById('thAdminAction').style.display = 'none';
+            }
+            binaJadual();
+        }
+
+        function binaJadual() {
+            let tbody = document.getElementById('jadualBody');
+            tbody.innerHTML = '';
+            
+            let tPeserta = 0, tBahagian = 0, tBayarKeseluruhan = 0, ada = false;
+
+            if (s_user.role === 'admin') {
+                tPeserta = Object.keys(global_db.pengguna).length;
+                for (let key in global_db.pengguna) {
+                    tBahagian += parseInt(global_db.pengguna[key].bahagian) || 1;
+                }
+            } else {
+                tPeserta = 1;
+                tBahagian = parseInt(s_user.bahagian) || 1;
+            }
+
+            let petaBayaranUser = {};
+            global_db.rekod.forEach(function(r) {
+                let amaun = parseFloat(r.jumlahBayar) || 0;
+                if (!petaBayaranUser[r.pendaftarPhone]) petaBayaranUser[r.pendaftarPhone] = 0;
+                petaBayaranUser[r.pendaftarPhone] += amaun;
+                
+                if (s_user.role === 'admin' || r.pendaftarPhone === s_user.username) {
+                    tBayarKeseluruhan += amaun;
+                }
+            });
+
+            global_db.rekod.forEach(function(r, i) {
+                if (s_user.role !== 'admin' && r.pendaftarPhone !== s_user.username) return;
+                ada = true;
+
+                let bahagianAsalUser = 1;
+                if (global_db.pengguna[r.pendaftarPhone]) {
+                    bahagianAsalUser = parseInt(global_db.pengguna[r.pendaftarPhone].bahagian) || 1;
+                }
+
+                let totalKosUser = bahagianAsalUser * 800;
+                let totalDahBayarUser = petaBayaranUser[r.pendaftarPhone] || 0;
+                let bakiUser = totalKosUser - totalDahBayarUser;
+                if(bakiUser < 0) bakiUser = 0;
+
+                let statusTeks = bakiUser <= 0 ? '<span class="status-lunas">LUNAS</span>' : '<span class="status-baki">Baki: RM '+bakiUser+'</span>';
+                let nama = s_user.role === 'admin' ? '<strong>'+r.namaNiat+'</strong><br><small>Oleh: '+r.pendaftarNama+' ('+r.pendaftarPhone+')</small>' : '<strong>'+r.namaNiat+'</strong>';
+                let aksi = s_user.role === 'admin' ? '<td><button onclick="padamRekod('+i+')" style="background:red; color:white; border:none; padding:2px 5px; cursor:pointer;">X</button></td>' : '';
+
+                tbody.innerHTML += '<tr><td>'+nama+'</td><td>'+bahagianAsalUser+'</td><td>'+totalKosUser.toFixed(2)+'</td><td>'+(parseFloat(r.jumlahBayar)||0).toFixed(2)+'</td><td>'+statusTeks+'</td>'+aksi+'</tr>';
+            });
+
+            let tKosKeseluruhan = tBahagian * 800;
+            let tBakiKeseluruhan = tKosKeseluruhan - tBayarKeseluruhan;
+            if (tBakiKeseluruhan < 0) tBakiKeseluruhan = 0;
+
+            document.getElementById('emptyMessage').style.display = ada ? 'none' : 'block';
+            document.getElementById('total-peserta').innerText = tPeserta;
+            document.getElementById('total-lembu').innerText = tBahagian;
+            document.getElementById('total-bayar').innerText = 'RM ' + tBayarKeseluruhan.toFixed(2);
+            document.getElementById('total-baki').innerText = 'RM ' + tBakiKeseluruhan.toFixed(2);
+        }
+
+        async function prosesHantarRekod() {
+            let nama = document.getElementById('namaNiat').value.trim();
+            let resit = document.getElementById('resit').value.trim();
+            let bayar = document.getElementById('jumlahBayar').value;
+
+                        
