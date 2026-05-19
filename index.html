@@ -166,7 +166,8 @@
         let global_db = { pengguna: {}, rekod: [] };
 
         function tetapkanLoading(papar) {
-            document.getElementById('loadingView').style.display = papar ? 'flex' : 'none';
+            let overlay = document.getElementById('loadingView');
+            if(overlay) overlay.style.display = papar ? 'flex' : 'none';
         }
 
         async function muatData() {
@@ -175,14 +176,22 @@
                     method: 'GET',
                     headers: { "X-Master-Key": MASTER_KEY, "X-Bin-Meta": "false" }
                 });
-                if (!r.ok) return false;
-                global_db = await r.json();
-                if (!global_db.pengguna) global_db.pengguna = {};
-                if (!global_db.rekod) global_db.rekod = [];
+                if (!r.ok) {
+                    global_db = { pengguna: {}, rekod: [] };
+                    return true;
+                }
+                let data = await r.json();
+                
+                // Pelindung keselamatan data korup/cacat
+                global_db = data ? data : { pengguna: {}, rekod: [] };
+                if (!global_db.pengguna || typeof global_db.pengguna !== 'object') global_db.pengguna = {};
+                if (!global_db.rekod || !Array.isArray(global_db.rekod)) global_db.rekod = [];
+                
                 return true;
             } catch(e) {
-                alert("Gagal hubungi server database: " + e.message);
-                return false;
+                console.log("Ralat muatData, bina struktur kosong alternatif:", e.message);
+                global_db = { pengguna: {}, rekod: [] };
+                return true; 
             }
         }
 
@@ -201,70 +210,77 @@
         }
 
         async function prosesDaftarAkaun() {
-            let nama = document.getElementById('regNama').value.trim();
-            let username = document.getElementById('regUsername').value.trim();
-            let bahagian = parseInt(document.getElementById('regBahagian').value) || 1;
-            let kataLuan = document.getElementById('regPassword').value.trim();
+            try {
+                let nama = document.getElementById('regNama').value.trim();
+                let username = document.getElementById('regUsername').value.trim();
+                let bahagian = parseInt(document.getElementById('regBahagian').value) || 1;
+                let kataLuan = document.getElementById('regPassword').value.trim();
 
-            if (!nama || !username || !kataLuan) {
-                alert("Sila isi semua ruang pendaftaran!");
-                return;
-            }
+                if (!nama || !username || !kataLuan) {
+                    alert("Sila isi semua ruang pendaftaran!");
+                    return;
+                }
 
-            tetapkanLoading(true);
-            let sedia = await muatData();
-            if (!sedia) { tetapkanLoading(false); return; }
+                tetapkanLoading(true);
+                await muatData(); 
 
-            if (global_db.pengguna[username]) {
-                alert("No. telefon ini sudah terdaftar!");
+                if (global_db.pengguna[username]) {
+                    alert("No. telefon ini sudah terdaftar!");
+                    tetapkanLoading(false);
+                    return;
+                }
+
+                global_db.pengguna[username] = { nama: nama, username: username, kataLuan: kataLuan, bahagian: bahagian, role: "peserta" };
+                
+                let jaya = await simpanData();
                 tetapkanLoading(false);
-                return;
-            }
 
-            global_db.pengguna[username] = { nama: nama, username: username, kataLuan: kataLuan, bahagian: bahagian, role: "peserta" };
-            
-            let jaya = await simpanData();
-            tetapkanLoading(false);
-
-            if (jaya) {
-                alert("Alhamdulillah, Akaun Berjaya Didaftarkan! Sila gunakan borang atas untuk Log Masuk.");
-                document.getElementById('regNama').value = '';
-                document.getElementById('regUsername').value = '';
-                document.getElementById('regPassword').value = '';
-            } else {
-                alert("Gagal menyimpan akaun baru ke database.");
+                if (jaya) {
+                    alert("Alhamdulillah, Akaun Berjaya Didaftarkan!\n\nSila guna borang atas untuk Log Masuk menggunakan No. Telefon & Kata Laluan anda.");
+                    document.getElementById('regNama').value = '';
+                    document.getElementById('regUsername').value = '';
+                    document.getElementById('regPassword').value = '';
+                } else {
+                    alert("Gagal menyimpan akaun baru ke database.");
+                }
+            } catch (err) {
+                tetapkanLoading(false);
+                alert("Ralat Sistem Pendaftaran: " + err.message);
             }
         }
 
         async function prosesLogMasuk() {
-            let username = document.getElementById('loginUsername').value.trim();
-            let kataLuan = document.getElementById('loginPassword').value.trim();
+            try {
+                let username = document.getElementById('loginUsername').value.trim();
+                let kataLuan = document.getElementById('loginPassword').value.trim();
 
-            if (!username || !kataLuan) {
-                alert("Sila masukkan No. Telefon dan Kata Laluan!");
-                return;
-            }
+                if (!username || !kataLuan) {
+                    alert("Sila masukkan No. Telefon dan Kata Laluan!");
+                    return;
+                }
 
-            if (username === 'admin' && kataLuan === 'admin') {
-                s_user = { nama: "Urus Setia KRT TSCC", username: "admin", role: "admin" };
+                if (username === 'admin' && kataLuan === 'admin') {
+                    s_user = { nama: "Urus Setia KRT TSCC", username: "admin", role: "admin" };
+                    tetapkanLoading(true);
+                    await muatData();
+                    tetapkanLoading(false);
+                    bukaDashboard();
+                    return;
+                }
+
                 tetapkanLoading(true);
                 await muatData();
                 tetapkanLoading(false);
-                bukaDashboard();
-                return;
-            }
 
-            tetapkanLoading(true);
-            let sedia = await muatData();
-            tetapkanLoading(false);
-
-            if (!sedia) return;
-
-            if (global_db.pengguna[username] && global_db.pengguna[username].kataLuan === kataLuan) {
-                s_user = global_db.pengguna[username];
-                bukaDashboard();
-            } else {
-                alert("No. Telefon atau Kata Laluan anda salah!");
+                if (global_db.pengguna[username] && global_db.pengguna[username].kataLuan === kataLuan) {
+                    s_user = global_db.pengguna[username];
+                    bukaDashboard();
+                } else {
+                    alert("No. Telefon atau Kata Laluan anda salah!");
+                }
+            } catch (err) {
+                tetapkanLoading(false);
+                alert("Ralat Sistem Log Masuk: " + err.message);
             }
         }
 
@@ -292,5 +308,53 @@
         }
 
         function binaJadual() {
-            if (!s_user)
-        
+            if (!s_user) return;
+            
+            let tbody = document.getElementById('jadualBody');
+            if(!tbody) return;
+            tbody.innerHTML = '';
+            
+            let tPeserta = 0, tBahagian = 0, tBayarKeseluruhan = 0, ada = false;
+
+            if (s_user.role === 'admin') {
+                tPeserta = Object.keys(global_db.pengguna).length;
+                for (let key in global_db.pengguna) {
+                    tBahagian += parseInt(global_db.pengguna[key].bahagian) || 1;
+                }
+            } else {
+                tPeserta = 1;
+                tBahagian = parseInt(s_user.bahagian) || 1;
+            }
+
+            let petaBayaranUser = {};
+            global_db.rekod.forEach(function(r) {
+                if(r && r.pendaftarPhone) {
+                    let amaun = parseFloat(r.jumlahBayar) || 0;
+                    if (!petaBayaranUser[r.pendaftarPhone]) petaBayaranUser[r.pendaftarPhone] = 0;
+                    petaBayaranUser[r.pendaftarPhone] += amaun;
+                    
+                    if (s_user.role === 'admin' || r.pendaftarPhone === s_user.username) {
+                        tBayarKeseluruhan += amaun;
+                    }
+                }
+            });
+
+            global_db.rekod.forEach(function(r, i) {
+                if (!r || (s_user.role !== 'admin' && r.pendaftarPhone !== s_user.username)) return;
+                ada = true;
+
+                let bahagianAsalUser = 1;
+                if (global_db.pengguna[r.pendaftarPhone]) {
+                    bahagianAsalUser = parseInt(global_db.pengguna[r.pendaftarPhone].bahagian) || 1;
+                }
+
+                let totalKosUser = bahagianAsalUser * 800;
+                let totalDahBayarUser = petaBayaranUser[r.pendaftarPhone] || 0;
+                let bakiUser = totalKosUser - totalDahBayarUser;
+                if(bakiUser < 0) bakiUser = 0;
+
+                let statusTeks = bakiUser <= 0 ? '<span class="status-lunas">LUNAS</span>' : '<span class="status-baki">Baki: RM '+bakiUser+'</span>';
+                let nama = s_user.role === 'admin' ? '<strong>'+r.namaNiat+'</strong><br><small>Oleh: '+r.pendaftarNama+' ('+r.pendaftarPhone+')</small>' : '<strong>'+r.namaNiat+'</strong>';
+                let aksi = s_user.role === 'admin' ? '<td><button onclick="padamRekod('+i+')" style="background:red; color:white; border:none; padding:2px 5px; cursor:pointer;">X</button></td>' : '';
+
+                tbody.innerHTML += '<tr><t
