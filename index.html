@@ -61,7 +61,7 @@
                 <div class="auth-title-static">🔑 Log Masuk Penduduk / Urus Setia</div>
                 <div class="form-group">
                     <label>No. Telefon</label>
-                    <input type="text" id="loginUsername" placeholder="Contoh: 0177000242 atau admin">
+                    <input type="text" id="loginUsername" placeholder="Contoh: 011234567 atau admin">
                 </div>
                 <div class="form-group">
                     <label>Kata Laluan</label>
@@ -123,7 +123,7 @@
                     <div class="form-group"><label>Nama Peserta (Niat)</label><input type="text" id="namaNiat" placeholder=""></div>
                     <div class="form-group"><label>Bilangan Bahagian</label><input type="number" id="bilangan" value="1"></div>
                     <div class="form-group"><label>No. Rujukan Resit</label><input type="text" id="resit" placeholder="Contoh: MBK12345"></div>
-                    <div class="form-group"><label>Amaun Dibayar (RM)</label><input type="number" id="jumlahBayar" value="800"></div>
+                    <div class="form-group"><label>Amaun Dibayar (RM)</label><input type="number" id="jumlahBayar" value="0"></div>
                     <button type="button" onclick="prosesHantarRekod()" class="btn-submit">Simpan Rekod Pembayaran</button>
                 </div>
 
@@ -149,7 +149,7 @@
 
         var MASTER_ADMINS = {
             "admin": { nama: "Urus Setia KRT TSCC", username: "admin", kataLuan: "admin", role: "admin" },
-            "01133332520": { nama: "En Awg Mohd Fauzi Bin Abu Samah", username: "01133332520", kataLuan: "3333", role: "admin" },
+            
             "0177000242": { nama: "En Ismail Bin Ishak", username: "0177000242", kataLuan: "300406", role: "admin" }
         };
 
@@ -265,7 +265,7 @@
                 var bilBahagian = parseInt(r.bilanganBahagian) || 0;
                 var bayar = parseFloat(r.jumlahBayar) || 0;
                 
-                tBahagian += bilBahagian; 
+                
                 tBayar += bayar; 
 
                 var statusTeks = '<span class="status-info">Telah Diterima: RM ' + bayar.toFixed(2) + '</span>';
