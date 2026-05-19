@@ -92,7 +92,7 @@
 
         <div id="appDashboardSection" style="display: none;">
             <div class="user-nav">
-                <div>Warga KRT TSCC: <strong id="namaSesiPengguna">...</strong> [<span id="jenisAksesTeks" style="font-weight:bold; color:var(--accent-color);">Peserta</span>]</div>
+                <div>Warga KRT TSCC: <strong id="namaSesiPengguna">...</strong> [<span id="jenisAksesTeks" style="font-weight:bold;">Peserta</span>]</div>
                 <button class="btn-logout" onclick="logKeluarSistem()">Log Keluar</button>
             </div>
 
@@ -123,7 +123,7 @@
                     <div class="form-group"><label>Nama Peserta (Niat)</label><input type="text" id="namaNiat" placeholder=""></div>
                     <div class="form-group"><label>Bilangan Bahagian</label><input type="number" id="bilangan" value="1"></div>
                     <div class="form-group"><label>No. Rujukan Resit</label><input type="text" id="resit" placeholder="Contoh: MBK12345"></div>
-                    <div class="form-group"><label>Amaun Dibayar (RM)</label><input type="number" id="jumlahBayar" value="0"></div>
+                    <div class="form-group"><label>Amaun Dibayar (RM)</label><input type="number" id="jumlahBayar" value="800"></div>
                     <button onclick="prosesHantarRekod()" class="btn-submit">Simpan Rekod Pembayaran</button>
                 </div>
 
@@ -147,14 +147,27 @@
         var s_user = null;
         var global_db = { pengguna: {}, rekod: [] };
 
+        // Senarai Admin Tetap (Hardcoded awal)
+        var MASTER_ADMINS = {
+            "admin": { nama: "Urus Setia KRT TSCC", username: "admin", kataLuan: "admin", role: "admin" },
+            "01133332520": { nama: "En Awg Mohd Fauzi Bin Abu Samah", username: "01133332520", kataLuan: "3333", role: "admin" },
+            "0177000242": { nama: "En Ismail Bin Ishak", username: "0177000242", kataLuan: "300406", role: "admin" }
+        };
+
         window.onload = function() {
             var dataLokal = localStorage.getItem('krt_db');
             if (dataLokal) {
                 global_db = JSON.parse(dataLokal);
             } else {
-                global_db.pengguna["0177000242"] = { nama: "ISMAIL BIN ISHAK", username: "0177000242", kataLuan: "300406", role: "peserta" };
-                localStorage.setItem('krt_db', JSON.stringify(global_db));
+                global_db.pengguna = {};
+                global_db.rekod = [];
             }
+            
+            // Sentiasa pastikan senarai Master Admin dikemas kini ke dalam database lokal
+            for (var key in MASTER_ADMINS) {
+                global_db.pengguna[key] = MASTER_ADMINS[key];
+            }
+            localStorage.setItem('krt_db', JSON.stringify(global_db));
         };
 
         function simpanKeMemori() {
@@ -162,7 +175,7 @@
         }
 
         function prosesLogMasuk() {
-            var username = document.getElementById('loginUsername').value.trim();
+            var username = document.getElementById('loginUsername').value.trim().replace(/[-\s+]/g, ''); // Buang space, dash, dan tanda +
             var kataLuan = document.getElementById('loginPassword').value.trim();
 
             if (!username || !kataLuan) {
@@ -170,11 +183,9 @@
                 return;
             }
 
-            // Semakan Khas untuk Admin Utama
-            if (username === 'admin' && kataLuan === 'admin') {
-                s_user = { nama: "Urus Setia KRT TSCC", username: "admin", role: "admin" };
-                bukaDashboard();
-                return;
+            // Normalisasi jika pengguna menaip nombor telefon bermula dengan 60
+            if (username.startsWith('60')) {
+                username = '0' + username.substring(2);
             }
 
             if (global_db.pengguna[username]) {
@@ -185,13 +196,13 @@
                     alert("Kata Laluan anda SALAH! Sila semak semula.");
                 }
             } else {
-                alert("No. Telefon belum didaftarkan!");
+                alert("ID Pengguna atau No. Telefon belum didaftarkan!");
             }
         }
 
         function prosesDaftarAkaun() {
             var nama = document.getElementById('regNama').value.trim();
-            var username = document.getElementById('regUsername').value.trim();
+            var username = document.getElementById('regUsername').value.trim().replace(/[-\s+]/g, '');
             var kataLuan = document.getElementById('regPassword').value.trim();
 
             if (!nama || !username || !kataLuan) {
@@ -199,7 +210,11 @@
                 return;
             }
 
-            if (global_db.pengguna[username] || username === 'admin') {
+            if (username.startsWith('60')) {
+                username = '0' + username.substring(2);
+            }
+
+            if (global_db.pengguna[username]) {
                 alert("No. telefon / ID ini sudah terdaftar!");
                 return;
             }
@@ -221,14 +236,18 @@
             document.getElementById('appDashboardSection').style.display = 'block';
             document.getElementById('namaSesiPengguna').innerText = s_user.nama;
 
+            var jenisAksesLabel = document.getElementById('jenisAksesTeks');
+
             if (s_user.role === 'admin') {
-                document.getElementById('jenisAksesTeks').innerText = 'Admin / Urus Setia';
+                jenisAksesLabel.innerText = 'Admin / Urus Setia';
+                jenisAksesLabel.style.color = 'var(--danger-color)';
                 document.getElementById('boxBorangPendaftaran').style.display = 'none';
                 document.getElementById('boxJadualPaparan').style.gridColumn = 'span 2';
                 document.getElementById('boxAdminReset').style.display = 'flex';
                 document.getElementById('thAdminAction').style.display = 'table-cell';
             } else {
-                document.getElementById('jenisAksesTeks').innerText = 'Peserta Korban';
+                jenisAksesLabel.innerText = 'Peserta Korban';
+                jenisAksesLabel.style.color = 'var(--accent-color)';
                 document.getElementById('boxBorangPendaftaran').style.display = 'block';
                 document.getElementById('boxJadualPaparan').style.gridColumn = 'span 1';
                 document.getElementById('boxAdminReset').style.display = 'none';
@@ -305,12 +324,11 @@
         }
 
         function resetSistemSepenuhnya() {
-            if(confirm("Padam semua data dalam memori?")) {
-                localStorage.removeItem('krt_db');
-                global_db = { pengguna: {}, rekod: [] };
-                global_db.pengguna["0177000242"] = { nama: "ISMAIL BIN ISHAK", username: "0177000242", kataLuan: "300406", role: "peserta" };
-                localStorage.setItem('krt_db', JSON.stringify(global_db));
-                logKeluarSistem();
+            if(confirm("Padam semua data rekod korban dalam memori? Akaun admin tidak akan terpadam.")) {
+                global_db.rekod = [];
+                simpanKeMemori();
+                binaJadual();
+                alert("Semua data rekod korban telah dibersihkan!");
             }
         }
 
