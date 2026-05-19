@@ -38,4 +38,296 @@
         .form-group { margin-bottom: 12px; }
         .form-group label { display: block; margin-bottom: 4px; font-weight: bold; font-size: 0.9rem; }
         .form-group input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 1rem; }
-        .btn-submit { background-color: var(--primary-color); color: white; border: none; padding: 12px; font-size: 1rem; font-weight: bold; border-radius: 5px; cursor: pointer; width:
+        .btn-submit { background-color: var(--primary-color); color: white; border: none; padding: 12px; font-size: 1rem; font-weight: bold; border-radius: 5px; cursor: pointer; width: 100%; text-align: center; }
+        .btn-reg-submit { background-color: var(--accent-color); color: white; border: none; padding: 12px; font-size: 1rem; font-weight: bold; border-radius: 5px; cursor: pointer; width: 100%; text-align: center; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 10px; }
+        th { background-color: var(--primary-color); color: white; padding: 10px; text-align: left; }
+        td { padding: 10px; border-bottom: 1px solid #e5e7eb; }
+        .status-lunas { color: var(--success-color); font-weight: bold; }
+        .status-baki { color: var(--danger-color); font-weight: bold; }
+        .empty-msg { text-align: center; color: #9ca3af; padding: 20px; font-style: italic; }
+        .loading-overlay { display:none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.9); z-index:9999; justify-content:center; align-items:center; font-weight:bold; color:var(--primary-color); text-align:center; }
+    </style>
+</head>
+<body>
+
+    <div id="loadingView" class="loading-overlay">Sila tunggu...<br>Sedang berhubung ke database online KRT...</div>
+
+    <header>
+        <h1>PROGRAM KORBAN 2027</h1>
+        <p>KRT Taman Seri Chinchin, Jasin, Melaka (TSCC)</p>
+    </header>
+
+    <div class="container">
+        <div id="authSectionArea">
+            <div class="auth-box-wrapper">
+                <div class="auth-title-static">🔑 Log Masuk Penduduk / Urus Setia</div>
+                <div class="form-group">
+                    <label>No. Telefon</label>
+                    <input type="text" id="loginUsername" placeholder="Contoh: 0123456789">
+                </div>
+                <div class="form-group">
+                    <label>Kata Laluan</label>
+                    <input type="password" id="loginPassword" placeholder="Masukkan kata laluan">
+                </div>
+                <button onclick="prosesLogMasuk()" class="btn-submit">Masuk Ke Dashboard</button>
+            </div>
+
+            <div style="text-align:center; margin: 25px 0; font-weight: bold; color: #6b7280;">━ ATAU JIKA BELUM ADA AKAUN ━</div>
+
+            <div class="auth-box-wrapper register-border">
+                <div class="auth-title-static" style="color: var(--accent-color);">📝 Pendaftaran Akaun Ahli Baru</div>
+                <div class="form-group">
+                    <label>Nama Penuh Anda</label>
+                    <input type="text" id="regNama" placeholder="Contoh: Ahmad bin Jamil">
+                </div>
+                <div class="form-group">
+                    <label>No. Telefon (ID Pengguna)</label>
+                    <input type="text" id="regUsername" placeholder="Contoh: 0176543210">
+                </div>
+                <div class="form-group">
+                    <label>Cipta Kata Laluan Akaun</label>
+                    <input type="password" id="regPassword" placeholder="Cipta kata laluan">
+                </div>
+                <button onclick="prosesDaftarAkaun()" class="btn-reg-submit">Hantar & Daftar Akaun</button>
+            </div>
+        </div>
+
+        <div id="appDashboardSection" style="display: none;">
+            <div class="user-nav">
+                <div>Warga KRT TSCC: <strong id="namaSesiPengguna">...</strong> [<span id="jenisAksesTeks" style="font-weight:bold; color:var(--accent-color);">Peserta</span>]</div>
+                <button class="btn-logout" onclick="logKeluarSistem()">Log Keluar</button>
+            </div>
+
+            <div id="boxAdminReset" style="display: none; background-color: #fee2e2; border: 1px solid #fca5a5; padding: 15px; border-radius: 8px; margin-bottom: 20px; justify-content: space-between; align-items: center;">
+                <div><strong style="color: #991b1b;">⚠️ KAWALAN ADMIN:</strong><p style="font-size: 0.85rem; color: #7f1d1d;">Padam bersih database untuk tahun baru.</p></div>
+                <button onclick="resetSistemSepenuhnya()" style="background-color:var(--danger-color); color:white; border:none; padding:8px 15px; font-weight:bold; border-radius:5px; cursor:pointer;">RESET ALL DATA</button>
+            </div>
+
+            <div class="intro-card">
+                <h2>Satu Bahagian, Seribu Keberkatan</h2>
+                <div class="highlight-box">💵 1 Bahagian Lembu = RM 800.00</div>
+                <div class="bank-info">
+                    <strong>🏦 MAKLUMAT PEMBAYARAN:</strong><br>
+                    MAYBANK | KRT TSCC | 5510 8942 4735<br>
+                    <a href="https://wa.me/60177000242" target="_blank" class="whatsapp-link">📱 WhatsApp Resit Bayaran (0177000242)</a>
+                </div>
+            </div>
+
+            <div class="dashboard">
+                <div class="stat-card"><h3>Rekod</h3><p id="total-peserta">0</p></div>
+                <div class="stat-card"><h3>Jumlah Bahagian</h3><p id="total-lembu">0</p></div>
+                <div class="stat-card"><h3>Telah Dibayar</h3><p style="color: var(--success-color);" id="total-bayar">RM 0.00</p></div>
+                <div class="stat-card"><h3>Baki Tunggakan</h3><p style="color: var(--accent-color);" id="total-baki">RM 0.00</p></div>
+            </div>
+
+            <div class="main-content">
+                <div class="form-section" id="boxBorangPendaftaran">
+                    <h2>Borang Rekod Korban</h2>
+                    <div class="form-group"><label>Nama Peserta (Niat)</label><input type="text" id="namaNiat"></div>
+                    <div class="form-group"><label>Bilangan Bahagian</label><input type="number" id="bilangan" value="1" readonly></div>
+                    <div class="form-group"><label>No. Rujukan Resit</label><input type="text" id="resit"></div>
+                    <div class="form-group"><label>Amaun Dibayar (RM)</label><input type="number" id="jumlahBayar" value="800"></div>
+                    <button onclick="prosesHantarRekor()" class="btn-submit">Simpan Rekod Pembayaran</button>
+                </div>
+
+                <div class="list-section" id="boxJadualPaparan">
+                    <h2>Senarai Rekod Pendaftaran</h2>
+                    <div style="overflow-x: auto;">
+                        <table>
+                            <thead>
+                                <tr><th>Niat / Peserta</th><th>Bahagian</th><th>Kos (RM)</th><th>Dibayar (RM)</th><th>Status</th><th id="thAdminAction" style="display:none;">Padam</th></tr>
+                            </thead>
+                            <tbody id="jadualBody"></tbody>
+                        </table>
+                        <div id="emptyMessage" class="empty-msg" style="display:none;">Tiada sebarang rekod.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const DB_URL = "https://api.jsonbin.io/v3/b/6a0be261ee5a733b12e14189"; 
+        const MASTER_KEY = "$2a$10$NZfgT1Nwuo6UgbzD/xgb4OGT9Fc0yX6BVfJX6VvLS8JhVCdQrn5sO"; 
+        
+        let s_user = null;
+        let global_db = { pengguna: {}, rekod: [] };
+
+        function tetapkanLoading(papar) {
+            document.getElementById('loadingView').style.display = papar ? 'flex' : 'none';
+        }
+
+        async function muatData() {
+            try {
+                let r = await fetch(DB_URL + "/latest", {
+                    method: 'GET',
+                    headers: { "X-Master-Key": MASTER_KEY, "X-Bin-Meta": "false" }
+                });
+                if (!r.ok) return false;
+                global_db = await r.json();
+                if (!global_db.pengguna) global_db.pengguna = {};
+                if (!global_db.rekod) global_db.rekod = [];
+                return true;
+            } catch(e) {
+                alert("Gagal hubungi server: " + e.message);
+                return false;
+            }
+        }
+
+        async function simpanData() {
+            try {
+                let r = await fetch(DB_URL, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'X-Master-Key': MASTER_KEY },
+                    body: JSON.stringify(global_db)
+                });
+                return r.ok;
+            } catch(e) {
+                alert("Gagal simpan ke server: " + e.message);
+                return false;
+            }
+        }
+
+        async function prosesDaftarAkaun() {
+            let nama = document.getElementById('regNama').value.trim();
+            let username = document.getElementById('regUsername').value.trim();
+            let kataLuan = document.getElementById('regPassword').value.trim();
+
+            if (!nama || !username || !kataLuan) {
+                alert("Sila isi semua ruang pendaftaran!");
+                return;
+            }
+
+            tetapkanLoading(true);
+            let sedia = await muatData();
+            if (!sedia) { tetapkanLoading(false); return; }
+
+            if (global_db.pengguna[username]) {
+                alert("No. telefon ini sudah terdaftar!");
+                tetapkanLoading(false);
+                return;
+            }
+
+            global_db.pengguna[username] = { nama: nama, username: username, kataLuan: kataLuan, role: "peserta" };
+            
+            let jaya = await simpanData();
+            tetapkanLoading(false);
+
+            if (jaya) {
+                alert("Alhamdulillah, Akaun Berjaya Didaftarkan! Sila gunakan borang atas untuk Log Masuk.");
+                document.getElementById('regNama').value = '';
+                document.getElementById('regUsername').value = '';
+                document.getElementById('regPassword').value = '';
+            } else {
+                alert("Gagal menyimpan akaun baru ke database.");
+            }
+        }
+
+        async function prosesLogMasuk() {
+            let username = document.getElementById('loginUsername').value.trim();
+            let kataLuan = document.getElementById('loginPassword').value.trim();
+
+            if (!username || !kataLuan) {
+                alert("Sila masukkan No. Telefon and Kata Laluan!");
+                return;
+            }
+
+            if (username === 'admin' && kataLuan === 'admin') {
+                s_user = { nama: "Urus Setia KRT TSCC", username: "admin", role: "admin" };
+                tetapkanLoading(true);
+                await muatData();
+                tetapkanLoading(false);
+                bukaDashboard();
+                return;
+            }
+
+            tetapkanLoading(true);
+            let sedia = await muatData();
+            tetapkanLoading(false);
+
+            if (!sedia) return;
+
+            if (global_db.pengguna[username] && global_db.pengguna[username].kataLuan === kataLuan) {
+                s_user = global_db.pengguna[username];
+                bukaDashboard();
+            } else {
+                alert("No. Telefon atau Kata Laluan anda salah!");
+            }
+        }
+
+        function bukaDashboard() {
+            document.getElementById('authSectionArea').style.display = 'none';
+            document.getElementById('appDashboardSection').style.display = 'block';
+            document.getElementById('namaSesiPengguna').innerText = s_user.nama;
+
+            if (s_user.role === 'admin') {
+                document.getElementById('jenisAksesTeks').innerText = 'Admin / Urus Setia';
+                document.getElementById('boxBorangPendaftaran').style.display = 'none';
+                document.getElementById('boxJadualPaparan').style.gridColumn = 'span 2';
+                document.getElementById('boxAdminReset').style.display = 'flex';
+                document.getElementById('thAdminAction').style.display = 'table-cell';
+            } else {
+                document.getElementById('jenisAksesTeks').innerText = 'Peserta Korban';
+                document.getElementById('boxBorangPendaftaran').style.display = 'block';
+                document.getElementById('boxJadualPaparan').style.gridColumn = 'span 1';
+                document.getElementById('boxAdminReset').style.display = 'none';
+                document.getElementById('thAdminAction').style.display = 'none';
+            }
+            binaJadual();
+        }
+
+        function binaJadual() {
+            let tbody = document.getElementById('jadualBody');
+            tbody.innerHTML = '';
+            let tPeserta = 0, tBahagian = 0, tBayar = 0, tBaki = 0, ada = false;
+
+            global_db.rekod.forEach(function(r, i) {
+                if (s_user.role !== 'admin' && r.pendaftarPhone !== s_user.username) return;
+                ada = true; tPeserta++;
+                let bayar = parseFloat(r.jumlahBayar) || 0;
+                let baki = 800 - bayar;
+                tBahagian += 1; tBayar += bayar; if(baki > 0) tBaki += baki;
+
+                let status = baki <= 0 ? '<span class="status-lunas">LUNAS</span>' : '<span class="status-baki">Baki: RM '+baki+'</span>';
+                let nama = s_user.role === 'admin' ? '<strong>'+r.namaNiat+'</strong><br><small>Oleh: '+r.pendaftarNama+' ('+r.pendaftarPhone+')</small>' : '<strong>'+r.namaNiat+'</strong>';
+                let aksi = s_user.role === 'admin' ? '<td><button onclick="padamRekod('+i+')" style="background:red; color:white; border:none; padding:2px 5px; cursor:pointer;">X</button></td>' : '';
+
+                tbody.innerHTML += '<tr><td>'+nama+'</td><td>1</td><td>800.00</td><td>'+bayar.toFixed(2)+'</td><td>'+status+'</td>'+aksi+'</tr>';
+            });
+
+            document.getElementById('emptyMessage').style.display = ada ? 'none' : 'block';
+            document.getElementById('total-peserta').innerText = tPeserta;
+            document.getElementById('total-lembu').innerText = tBahagian;
+            document.getElementById('total-bayar').innerText = 'RM ' + tBayar.toFixed(2);
+            document.getElementById('total-baki').innerText = 'RM ' + tBaki.toFixed(2);
+        }
+
+        async function prosesHantarRekor() {
+            let nama = document.getElementById('namaNiat').value.trim();
+            let resit = document.getElementById('resit').value.trim();
+            let bayar = document.getElementById('jumlahBayar').value;
+
+            if(!nama || !resit) { alert("Sila lengkapkan nama peserta & rujukan resit!"); return; }
+
+            global_db.rekod.push({ pendaftarPhone: s_user.username, pendaftarNama: s_user.nama, namaNiat: nama, resit: resit, jumlahBayar: parseFloat(bayar) });
+            tetapkanLoading(true);
+            await simpanData();
+            tetapkanLoading(false);
+            alert("Rekod berjaya dihantar ke server online!");
+            document.getElementById('namaNiat').value = ''; document.getElementById('resit').value = '';
+            binaJadual();
+        }
+
+        async function padamRekod(i) {
+            if(confirm("Padam rekod ini?")) {
+                global_db.rekod.splice(i, 1);
+                tetapkanLoading(true);
+                await simpanData();
+                tetapkanLoading(false);
+                binaJadual();
+            }
+        }
+
+        async function resetSistemSepenuh
+        
