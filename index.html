@@ -59,6 +59,7 @@
     </header>
 
     <div class="container">
+        
         <div id="authSectionArea">
             <div class="auth-box-wrapper">
                 <div class="auth-title-static">🔑 Log Masuk Penduduk / Urus Setia</div>
@@ -148,7 +149,7 @@
     </div>
 
     <script>
-        // Gunakan terus URL asal bin abang tanpa gangguan
+        // PENGHUBUNG KOD ASAL DATABASE JSONBIN ABANG
         const DB_URL = "https://api.jsonbin.io/v3/b/6a0be261ee5a733b12e14189"; 
         const MASTER_KEY = "$2a$10$NZfgT1Nwuo6UgbzD/xgb4OGT9Fc0yX6BVfJX6VvLS8JhVCdQrn5sO"; 
         
@@ -165,16 +166,13 @@
                     method: 'GET',
                     headers: { "X-Master-Key": MASTER_KEY, "X-Bin-Meta": "false" }
                 });
-                if (!r.ok) {
-                    alert("Respons server tidak OK. Sila pastikan Master Key atau ID Bin betul.");
-                    return false;
-                }
+                if (!r.ok) return false;
                 global_db = await r.json();
                 if (!global_db.pengguna) global_db.pengguna = {};
                 if (!global_db.rekod) global_db.rekod = [];
                 return true;
             } catch(e) {
-                alert("Gagal hubungi server internet: " + e.message);
+                alert("Gagal memuatkan data online: " + e.message);
                 return false;
             }
         }
@@ -188,7 +186,7 @@
                 });
                 return r.ok;
             } catch(e) {
-                alert("Gagal simpan ke pangkalan data online: " + e.message);
+                alert("Gagal menyimpan ke pangkalan data online: " + e.message);
                 return false;
             }
         }
@@ -219,12 +217,12 @@
             tetapkanLoading(false);
 
             if (jaya) {
-                alert("Alhamdulillah, Pendaftaran Berjaya Disimpan Online! Sila masukkan No. Telefon tadi di borang atas untuk Log Masuk.");
+                alert("Alhamdulillah, Akaun Berjaya Didaftarkan! Sila gunakan borang atas untuk Log Masuk.");
                 document.getElementById('regNama').value = '';
                 document.getElementById('regUsername').value = '';
                 document.getElementById('regPassword').value = '';
             } else {
-                alert("Gagal menyimpan pendaftaran ke server.");
+                alert("Gagal menyimpan akaun baru ke database.");
             }
         }
 
@@ -237,7 +235,6 @@
                 return;
             }
 
-            // Akses Urus Setia (Admin)
             if (username === 'admin' && kataLuan === 'admin') {
                 s_user = { nama: "Urus Setia KRT TSCC", username: "admin", role: "admin" };
                 tetapkanLoading(true);
@@ -257,102 +254,10 @@
                 s_user = global_db.pengguna[username];
                 bukaDashboard();
             } else {
-                alert("No. Telefon atau Kata Laluan yang anda masukkan SALAH!");
+                alert("No. Telefon atau Kata Laluan anda salah!");
             }
         }
 
         function bukaDashboard() {
-            document.getElementById('authSectionArea').style.display = 'none';
-            document.getElementById('appDashboardSection').style.display = 'block';
-            document.getElementById('namaSesiPengguna').innerText = s_user.nama;
-
-            if (s_user.role === 'admin') {
-                document.getElementById('jenisAksesTeks').innerText = 'Admin / Urus Setia';
-                document.getElementById('boxBorangPendaftaran').style.display = 'none';
-                document.getElementById('boxJadualPaparan').style.gridColumn = 'span 2';
-                document.getElementById('boxAdminReset').style.display = 'flex';
-                document.getElementById('thAdminAction').style.display = 'table-cell';
-            } else {
-                document.getElementById('jenisAksesTeks').innerText = 'Peserta Korban';
-                document.getElementById('boxBorangPendaftaran').style.display = 'block';
-                document.getElementById('boxJadualPaparan').style.gridColumn = 'span 1';
-                document.getElementById('boxAdminReset').style.display = 'none';
-                document.getElementById('thAdminAction').style.display = 'none';
-            }
-            binaJadual();
-        }
-
-        function binaJadual() {
-            let tbody = document.getElementById('jadualBody');
-            tbody.innerHTML = '';
-            let tPeserta = 0, tBahagian = 0, tBayar = 0, tBaki = 0, ada = false;
-
-            global_db.rekod.forEach(function(r, i) {
-                if (s_user.role !== 'admin' && r.pendaftarPhone !== s_user.username) return;
-                ada = true; tPeserta++;
-                
-                let bayar = parseFloat(r.jumlahBayar) || 0;
-                let baki = 800 - bayar;
-                
-                tBahagian += 1; 
-                tBayar += bayar; 
-                if(baki > 0) tBaki += baki;
-
-                let status = baki <= 0 ? '<span class="status-lunas">LUNAS</span>' : '<span class="status-baki">Baki: RM '+baki+'</span>';
-                let nama = s_user.role === 'admin' ? '<strong>'+r.namaNiat+'</strong><br><small>Oleh: '+r.pendaftarNama+' ('+r.pendaftarPhone+')</small>' : '<strong>'+r.namaNiat+'</strong>';
-                let aksi = s_user.role === 'admin' ? '<td><button onclick="padamRekod('+i+')" style="background:red; color:white; border:none; padding:2px 5px; cursor:pointer;">X</button></td>' : '';
-
-                tbody.innerHTML += '<tr><td>'+nama+'</td><td>1</td><td>800.00</td><td>'+bayar.toFixed(2)+'</td><td>'+status+'</td>'+aksi+'</tr>';
-            });
-
-            document.getElementById('emptyMessage').style.display = ada ? 'none' : 'block';
-            document.getElementById('total-peserta').innerText = tPeserta;
-            document.getElementById('total-lembu').innerText = tBahagian;
-            document.getElementById('total-bayar').innerText = 'RM ' + tBayar.toFixed(2);
-            document.getElementById('total-baki').innerText = 'RM ' + tBaki.toFixed(2);
-        }
-
-        async function prosesHantarRekod() {
-            let nama = document.getElementById('namaNiat').value.trim();
-            let resit = document.getElementById('resit').value.trim();
-            let bayar = document.getElementById('jumlahBayar').value;
-
-            if(!nama || !resit) { alert("Sila lengkapkan nama peserta & rujukan resit!"); return; }
-
-            global_db.rekod.push({ pendaftarPhone: s_user.username, pendaftarNama: s_user.nama, namaNiat: nama, resit: resit, jumlahBayar: parseFloat(bayar) });
-            tetapkanLoading(true);
-            await simpanData();
-            tetapkanLoading(false);
-            alert("Rekod pembayaran berjaya disimpan ke JSONBin!");
-            document.getElementById('namaNiat').value = ''; document.getElementById('resit').value = '';
-            binaJadual();
-        }
-
-        async function padamRekod(i) {
-            if(confirm("Padam rekod ini dari database online?")) {
-                global_db.rekod.splice(i, 1);
-                tetapkanLoading(true);
-                await simpanData();
-                tetapkanLoading(false);
-                binaJadual();
-            }
-        }
-
-        async function resetSistemSepenuhnya() {
-            if(confirm("⚠️ AMARAN: Ini akan memadam semua data penduduk online bersih. Anda pasti?")) {
-                global_db = { pengguna: {}, rekod: [] };
-                tetapkanLoading(true);
-                await simpanData();
-                tetapkanLoading(false);
-                logKeluarSistem();
-            }
-        }
-
-        function logKeluarSistem() {
-            s_user = null;
-            document.getElementById('authSectionArea').style.display = 'block';
-            document.getElementById('appDashboardSection').style.display = 'none';
-        }
-    </script>
-</body>
-</html>
+            document.getElementById('auth
+        
