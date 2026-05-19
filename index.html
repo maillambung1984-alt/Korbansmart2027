@@ -176,7 +176,7 @@
         const DB_URL = "https://api.jsonbin.io/v3/b/6a0be261ee5a733b12e14189";
         const MASTER_KEY = "$2a$10$NZfgT1Nwuo6UgbzD/xgb4OGT9Fc0yX6BVfJX6VvLS8JhVCdQrn5sO";
         
-        letcurrentUser = null;
+        let currentUser = null;
         let localData = { pengguna: {}, rekod: [] };
 
         function tukarTab(jenis) {
@@ -258,7 +258,7 @@
             if(!user || !pass) { alert("Sila masukkan No. Telefon & Kata Laluan!"); return; }
 
             if(user === 'admin' && pass === 'admin') {
-                letcurrentUser = { nama: "Urus Setia KRT TSCC", user: "admin", role: "admin" };
+                currentUser = { nama: "Urus Setia KRT TSCC", user: "admin", role: "admin" };
                 document.getElementById('loadingAuth').style.display = 'block';
                 await dapatkanDatabase();
                 document.getElementById('loadingAuth').style.display = 'none';
@@ -273,7 +273,7 @@
             if(!sedia) return;
 
             if(localData.pengguna[user] && localData.pengguna[user].pass === pass) {
-                letcurrentUser = localData.pengguna[user];
+                currentUser = localData.pengguna[user];
                 bukaDashboard();
             } else {
                 alert("No. Telefon atau Kata Laluan adalah SALAH!");
@@ -283,9 +283,9 @@
         function bukaDashboard() {
             document.getElementById('authSection').style.display = 'none';
             document.getElementById('appSection').style.display = 'block';
-            document.getElementById('namaPengguna').innerText = letcurrentUser.nama;
+            document.getElementById('namaPengguna').innerText = currentUser.nama;
 
-            if(letcurrentUser.role === 'admin') {
+            if(currentUser.role === 'admin') {
                 document.getElementById('aksesPengguna').innerText = "Admin Urus Setia";
                 document.getElementById('borangInputSeksi').style.display = 'none';
                 document.getElementById('jadualSeksi').style.gridColumn = 'span 2';
@@ -307,14 +307,14 @@
 
             let totalPeserta = 0, totalBahagian = 0, totalBayar = 0, adaData = false;
 
-            if(letcurrentUser.role === 'admin') {
+            if(currentUser.role === 'admin') {
                 totalPeserta = Object.keys(localData.pengguna).length;
                 for(let key in localData.pengguna) {
                     totalBahagian += parseInt(localData.pengguna[key].bahagian) || 1;
                 }
             } else {
                 totalPeserta = 1;
-                totalBahagian = parseInt(letcurrentUser.bahagian) || 1;
+                totalBahagian = parseInt(currentUser.bahagian) || 1;
             }
 
             let kiraBayarUser = {};
@@ -323,13 +323,13 @@
                 if(!kiraBayarUser[r.pendaftarPhone]) kiraBayarUser[r.pendaftarPhone] = 0;
                 kiraBayarUser[r.pendaftarPhone] += amaun;
 
-                if(letcurrentUser.role === 'admin' || r.pendaftarPhone === letcurrentUser.user) {
+                if(currentUser.role === 'admin' || r.pendaftarPhone === currentUser.user) {
                     totalBayar += amaun;
                 }
             });
 
             localData.rekod.forEach((r, index) => {
-                if(letcurrentUser.role !== 'admin' && r.pendaftarPhone !== letcurrentUser.user) return;
+                if(currentUser.role !== 'admin' && r.pendaftarPhone !== currentUser.user) return;
                 adaData = true;
 
                 let bahagianUser = 1;
@@ -343,10 +343,10 @@
                 if(baki < 0) baki = 0;
 
                 let statusLabel = baki <= 0 ? '<span class="status-lunas">LUNAS</span>' : '<span class="status-baki">Baki: RM ' + baki + '</span>';
-                let namaKolum = letcurrentUser.role === 'admin' ? '<strong>' + r.namaNiat + '</strong><br><small>Oleh: ' + r.pendaftarNama + ' (' + r.pendaftarPhone + ')</small>' : '<strong>' + r.namaNiat + '</strong>';
-                let aksiKolum = letcurrentUser.role === 'admin' ? '<td><button onclick="padamRekod(' + index + ')" style="background:red; color:white; border:none; padding:2px 6px; cursor:pointer; border-radius:3px;">X</button></td>' : '';
+                let namaKolum = currentUser.role === 'admin' ? '<strong>' + r.namaNiat + '</strong><br><small>Oleh: ' + r.pendaftarNama + ' (' + r.pendaftarPhone + ')</small>' : '<strong>' + r.namaNiat + '</strong>';
+                let aksiKolum = currentUser.role === 'admin' ? '<td><button onclick="padamRekod(' + index + ')" style="background:red; color:white; border:none; padding:2px 6px; cursor:pointer; border-radius:3px;">X</button></td>' : '';
 
-                tbody.innerHTML += '<tr><td>' + namaKolum + '</td><td>' + bahagianUser + '</td><td>' + kosWajib.toFixed(2) + '</td><td>' + (parseFloat(r.jumlahBayar) || 0).toFixed(2) + '</td><td>' + statusLabel + '</td>' + aksiKolum + '</tr>';
+                tbody.innerHTML += '<tr><td>' + namaKolum + '</td><td>' + bahagianUser + '</td><td>' + totalKosWajib.toFixed(2) + '</td><td>' + (parseFloat(r.jumlahBayar) || 0).toFixed(2) + '</td><td>' + statusLabel + '</td>' + aksiKolum + '</tr>';
             });
 
             let totalKosWajib = totalBahagian * 800;
@@ -362,4 +362,5 @@
 
         async function hantarRekod() {
             let niat = document.getElementById('namaNiat').value.trim();
-            let resit = document.getElementById('resit').value
+            let resit = document.getElementById('resit').value.trim();
+            let bayar
