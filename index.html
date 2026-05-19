@@ -98,6 +98,7 @@
                     <label>No. Telefon</label>
                     <input type="text" id="regUser" placeholder="Contoh: 0123456789">
                 </div>
+                
                 <div class="form-group">
                     <label>Bilangan Bahagian Korban Diikuti</label>
                     <select id="regBahagian">
@@ -110,6 +111,7 @@
                         <option value="7">7 Bahagian (1 Ekor - RM 5600)</option>
                     </select>
                 </div>
+
                 <div class="form-group">
                     <label>Cipta Kata Laluan</label>
                     <input type="password" id="regPass" placeholder="Cipta kata laluan anda">
@@ -194,7 +196,6 @@
                 });
                 if(res.ok) {
                     localData = await res.json();
-                    if(!localData || typeof localData !== 'object') localData = { pengguna: {}, rekod: [] };
                     if(!localData.pengguna) localData.pengguna = {};
                     if(!localData.rekod) localData.rekod = [];
                     return true;
@@ -229,7 +230,6 @@
 
             document.getElementById('loadingAuth').style.display = 'block';
             let sedia = await dapatkanDatabase();
-            
             if(!sedia) { document.getElementById('loadingAuth').style.display = 'none'; return; }
 
             if(localData.pengguna[user]) {
@@ -244,7 +244,7 @@
             document.getElementById('loadingAuth').style.display = 'none';
 
             if(jaya) {
-                alert("Alhamdulillah, Pendaftaran Berjaya! Anda kini boleh klik 'Log Masuk'.");
+                alert("Alhamdulillah, Pendaftaran Berjaya!");
                 document.getElementById('regNama').value = '';
                 document.getElementById('regUser').value = '';
                 document.getElementById('regPass').value = '';
@@ -304,7 +304,6 @@
 
         function binaJadual() {
             let tbody = document.getElementById('jadualBody');
-            if(!tbody) return;
             tbody.innerHTML = '';
 
             let totalPeserta = 0, totalBahagian = 0, totalBayar = 0, adaData = false;
@@ -319,23 +318,19 @@
                 totalBahagian = parseInt(currentUser.bahagian) || 1;
             }
 
-            let totalKosWajib = totalBahagian * 800;
-
             let kiraBayarUser = {};
             localData.rekod.forEach(r => {
-                if(r && r.pendaftarPhone) {
-                    let amaun = parseFloat(r.jumlahBayar) || 0;
-                    if(!kiraBayarUser[r.pendaftarPhone]) kiraBayarUser[r.pendaftarPhone] = 0;
-                    kiraBayarUser[r.pendaftarPhone] += amaun;
+                let amaun = parseFloat(r.jumlahBayar) || 0;
+                if(!kiraBayarUser[r.pendaftarPhone]) kiraBayarUser[r.pendaftarPhone] = 0;
+                kiraBayarUser[r.pendaftarPhone] += amaun;
 
-                    if(currentUser.role === 'admin' || r.pendaftarPhone === currentUser.user) {
-                        totalBayar += amaun;
-                    }
+                if(currentUser.role === 'admin' || r.pendaftarPhone === currentUser.user) {
+                    totalBayar += amaun;
                 }
             });
 
             localData.rekod.forEach((r, index) => {
-                if(!r || (currentUser.role !== 'admin' && r.pendaftarPhone !== currentUser.user)) return;
+                if(currentUser.role !== 'admin' && r.pendaftarPhone !== currentUser.user) return;
                 adaData = true;
 
                 let bahagianUser = 1;
@@ -355,6 +350,7 @@
                 tbody.innerHTML += '<tr><td>' + namaKolum + '</td><td>' + bahagianUser + '</td><td>' + kosWajib.toFixed(2) + '</td><td>' + (parseFloat(r.jumlahBayar) || 0).toFixed(2) + '</td><td>' + statusLabel + '</td>' + aksiKolum + '</tr>';
             });
 
+            let totalKosWajib = totalBahagian * 800;
             let totalBakiTunggakan = totalKosWajib - totalBayar;
             if(totalBakiTunggakan < 0) totalBakiTunggakan = 0;
 
@@ -362,4 +358,10 @@
             document.getElementById('stat-peserta').innerText = totalPeserta;
             document.getElementById('stat-bahagian').innerText = totalBahagian;
             document.getElementById('stat-bayar').innerText = 'RM ' + totalBayar.toFixed(2);
-            document.getElementById('stat-baki').innerText = 'RM ' + totalBakiTunggak
+            document.getElementById('stat-baki').innerText = 'RM ' + totalBakiTunggakan.toFixed(2);
+        }
+
+        async function hantarRekod() {
+            let niat = document.getElementById('namaNiat').value.trim();
+            let resit = document.getElementById('resit').value.trim();
+            let bayar = document.getElementById('jumlah
