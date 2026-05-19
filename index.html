@@ -125,7 +125,7 @@
                 <div class="form-section" id="boxBorangPendaftaran">
                     <h2>Borang Rekod Korban</h2>
                     <div class="form-group"><label>Nama Peserta (Niat)</label><input type="text" id="namaNiat"></div>
-                    <div class="form-group"><label>Bilangan Bahagian</label><input type="number" id="bilangan" value="0" readonly></div>
+                    <div class="form-group"><label>Bilangan Bahagian</label><input type="number" id="bilangan" value="1" readonly></div>
                     <div class="form-group"><label>No. Rujukan Resit</label><input type="text" id="resit"></div>
                     <div class="form-group"><label>Amaun Dibayar (RM)</label><input type="number" id="jumlahBayar" value="800"></div>
                     <button onclick="prosesHantarRekod()" class="btn-submit">Simpan Rekod Pembayaran</button>
@@ -148,6 +148,7 @@
     </div>
 
     <script>
+        // Gunakan terus URL asal bin abang tanpa gangguan
         const DB_URL = "https://api.jsonbin.io/v3/b/6a0be261ee5a733b12e14189"; 
         const MASTER_KEY = "$2a$10$NZfgT1Nwuo6UgbzD/xgb4OGT9Fc0yX6BVfJX6VvLS8JhVCdQrn5sO"; 
         
@@ -164,13 +165,16 @@
                     method: 'GET',
                     headers: { "X-Master-Key": MASTER_KEY, "X-Bin-Meta": "false" }
                 });
-                if (!r.ok) return false;
+                if (!r.ok) {
+                    alert("Respons server tidak OK. Sila pastikan Master Key atau ID Bin betul.");
+                    return false;
+                }
                 global_db = await r.json();
                 if (!global_db.pengguna) global_db.pengguna = {};
                 if (!global_db.rekod) global_db.rekod = [];
                 return true;
             } catch(e) {
-                alert("Gagal hubungi server: " + e.message);
+                alert("Gagal hubungi server internet: " + e.message);
                 return false;
             }
         }
@@ -184,7 +188,7 @@
                 });
                 return r.ok;
             } catch(e) {
-                alert("Gagal simpan ke server: " + e.message);
+                alert("Gagal simpan ke pangkalan data online: " + e.message);
                 return false;
             }
         }
@@ -215,12 +219,12 @@
             tetapkanLoading(false);
 
             if (jaya) {
-                alert("Alhamdulillah, Akaun Berjaya Didaftarkan! Sila gunakan borang atas untuk Log Masuk.");
+                alert("Alhamdulillah, Pendaftaran Berjaya Disimpan Online! Sila masukkan No. Telefon tadi di borang atas untuk Log Masuk.");
                 document.getElementById('regNama').value = '';
                 document.getElementById('regUsername').value = '';
                 document.getElementById('regPassword').value = '';
             } else {
-                alert("Gagal menyimpan akaun baru ke database.");
+                alert("Gagal menyimpan pendaftaran ke server.");
             }
         }
 
@@ -229,10 +233,11 @@
             let kataLuan = document.getElementById('loginPassword').value.trim();
 
             if (!username || !kataLuan) {
-                alert("Sila masukkan No. Telefon and Kata Laluan!");
+                alert("Sila masukkan No. Telefon dan Kata Laluan!");
                 return;
             }
 
+            // Akses Urus Setia (Admin)
             if (username === 'admin' && kataLuan === 'admin') {
                 s_user = { nama: "Urus Setia KRT TSCC", username: "admin", role: "admin" };
                 tetapkanLoading(true);
@@ -252,7 +257,7 @@
                 s_user = global_db.pengguna[username];
                 bukaDashboard();
             } else {
-                alert("No. Telefon atau Kata Laluan anda salah!");
+                alert("No. Telefon atau Kata Laluan yang anda masukkan SALAH!");
             }
         }
 
@@ -289,7 +294,7 @@
                 let bayar = parseFloat(r.jumlahBayar) || 0;
                 let baki = 800 - bayar;
                 
-                tBahagian += 1; // TETAP KEKAL 1 BAHAGIAN SAHAJA
+                tBahagian += 1; 
                 tBayar += bayar; 
                 if(baki > 0) tBaki += baki;
 
@@ -318,13 +323,13 @@
             tetapkanLoading(true);
             await simpanData();
             tetapkanLoading(false);
-            alert("Rekod berjaya dihantar ke server online!");
+            alert("Rekod pembayaran berjaya disimpan ke JSONBin!");
             document.getElementById('namaNiat').value = ''; document.getElementById('resit').value = '';
             binaJadual();
         }
 
         async function padamRekod(i) {
-            if(confirm("Padam rekod ini?")) {
+            if(confirm("Padam rekod ini dari database online?")) {
                 global_db.rekod.splice(i, 1);
                 tetapkanLoading(true);
                 await simpanData();
@@ -334,7 +339,7 @@
         }
 
         async function resetSistemSepenuhnya() {
-            if(confirm("Padam semua data online bersih?")) {
+            if(confirm("⚠️ AMARAN: Ini akan memadam semua data penduduk online bersih. Anda pasti?")) {
                 global_db = { pengguna: {}, rekod: [] };
                 tetapkanLoading(true);
                 await simpanData();
@@ -351,4 +356,3 @@
     </script>
 </body>
 </html>
-
