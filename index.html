@@ -19,39 +19,48 @@
         body { background-color: var(--bg-light); color: var(--text-dark); padding-bottom: 40px; }
         header { background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white; padding: 30px 20px; text-align: center; border-bottom: 5px solid var(--accent-color); }
         .container { max-width: 1200px; margin: 20px auto; padding: 0 15px; }
-        .auth-box-wrapper { max-width: 450px; margin: 20px auto; background: var(--card-bg); padding: 25px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-top: 4px solid var(--primary-color); }
-        .auth-box-wrapper.register-border { border-top: 4px solid var(--accent-color); }
-        .auth-title-static { font-size: 1.2rem; font-weight: bold; color: var(--text-dark); margin-bottom: 15px; text-align: center; }
+        
+        .auth-container { max-width: 500px; margin: 30px auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .auth-toggle { display: flex; margin-bottom: 25px; border-bottom: 2px solid #e5e7eb; }
+        .tab-btn { flex: 1; padding: 12px; text-align: center; background: none; border: none; font-size: 1.1rem; font-weight: bold; color: #6b7280; cursor: pointer; }
+        .tab-btn.active { color: var(--primary-color); border-bottom: 3px solid var(--primary-color); }
+        
         .user-nav { display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 15px 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .btn-logout { background-color: #6b7280; color: white; border: none; padding: 6px 15px; border-radius: 4px; cursor: pointer; font-weight: 600; }
-        .intro-card { background: white; border-left: 5px solid var(--accent-color); padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+        
+        .intro-card { background: white; border-left: 5px solid var(--accent-color); padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .highlight-box { background-color: #fef3c7; color: #92400e; padding: 12px; border-radius: 5px; margin-top: 10px; font-weight: bold; }
         .bank-info { background-color: #eff6ff; color: #1e40af; padding: 12px; border-radius: 5px; margin-top: 10px; border-left: 5px solid #3b82f6; font-size: 0.9rem; }
         .whatsapp-link { color: #16a34a; font-weight: bold; text-decoration: none; display: inline-block; margin-top: 5px; }
+        
         .dashboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
         .stat-card { background: white; padding: 15px; border-radius: 8px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border-top: 4px solid var(--primary-color); }
         .stat-card p { font-size: 1.5rem; font-weight: bold; color: var(--primary-color); margin-top: 5px; }
+        
         .main-content { display: grid; grid-template-columns: 1fr 1.3fr; gap: 20px; }
         @media (max-width: 850px) { .main-content { grid-template-columns: 1fr; } }
+        
         .form-section, .list-section { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .form-section h2, .list-section h2 { color: var(--primary-color); margin-bottom: 15px; border-bottom: 2px solid #e5e7eb; padding-bottom: 5px; }
-        .form-group { margin-bottom: 12px; }
-        .form-group label { display: block; margin-bottom: 4px; font-weight: bold; font-size: 0.9rem; }
-        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 1rem; background-color: #fff; }
+        
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.9rem; }
+        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 1rem; }
+        
         .btn-submit { background-color: var(--primary-color); color: white; border: none; padding: 12px; font-size: 1rem; font-weight: bold; border-radius: 5px; cursor: pointer; width: 100%; text-align: center; }
-        .btn-reg-submit { background-color: var(--accent-color); color: white; border: none; padding: 12px; font-size: 1rem; font-weight: bold; border-radius: 5px; cursor: pointer; width: 100%; text-align: center; }
+        .btn-submit:hover { background-color: var(--secondary-color); }
+        
         table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 10px; }
         th { background-color: var(--primary-color); color: white; padding: 10px; text-align: left; }
         td { padding: 10px; border-bottom: 1px solid #e5e7eb; }
+        
         .status-lunas { color: var(--success-color); font-weight: bold; }
         .status-baki { color: var(--danger-color); font-weight: bold; }
         .empty-msg { text-align: center; color: #9ca3af; padding: 20px; font-style: italic; }
-        .loading-overlay { display:none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.9); z-index:9999; justify-content:center; align-items:center; font-weight:bold; color:var(--primary-color); text-align:center; }
+        .loading { text-align: center; padding: 10px; color: var(--accent-color); font-weight: bold; }
     </style>
 </head>
 <body>
-
-    <div id="loadingView" class="loading-overlay">Sila tunggu...<br>Sedang berhubung ke database online KRT...</div>
 
     <header>
         <h1>PROGRAM KORBAN 2027</h1>
@@ -59,31 +68,35 @@
     </header>
 
     <div class="container">
-        <div id="authSectionArea">
-            <div class="auth-box-wrapper">
-                <div class="auth-title-static">🔑 Log Masuk Penduduk / Urus Setia</div>
+        
+        <div id="authSection" class="auth-container">
+            <div class="auth-toggle">
+                <button id="tabLogin" class="tab-btn active" onclick="tukarTab('login')">Log Masuk</button>
+                <button id="tabRegister" class="tab-btn" onclick="tukarTab('register')">Daftar Ahli</button>
+            </div>
+            
+            <div id="loadingAuth" class="loading" style="display: none;">Menghubungi server online...</div>
+
+            <div id="formLogin">
                 <div class="form-group">
-                    <label>No. Telefon</label>
-                    <input type="text" id="loginUsername" placeholder="Contoh: 0123456789">
+                    <label>No. Telefon (ID Pengguna)</label>
+                    <input type="text" id="loginUser" placeholder="Contoh: 0123456789">
                 </div>
                 <div class="form-group">
                     <label>Kata Laluan</label>
-                    <input type="password" id="loginPassword" placeholder="Masukkan kata laluan">
+                    <input type="password" id="loginPass" placeholder="Masukkan kata laluan">
                 </div>
-                <button onclick="prosesLogMasuk()" class="btn-submit">Masuk Ke Dashboard</button>
+                <button onclick="logMasuk()" class="btn-submit">Masuk Sistem</button>
             </div>
 
-            <div style="text-align:center; margin: 25px 0; font-weight: bold; color: #6b7280;">━ ATAU JIKA BELUM ADA AKAUN ━</div>
-
-            <div class="auth-box-wrapper register-border">
-                <div class="auth-title-static" style="color: var(--accent-color);">📝 Pendaftaran Akaun Ahli Baru</div>
+            <div id="formRegister" style="display: none;">
                 <div class="form-group">
-                    <label>Nama Penuh Anda</label>
+                    <label>Nama Penuh</label>
                     <input type="text" id="regNama" placeholder="Contoh: Ahmad bin Jamil">
                 </div>
                 <div class="form-group">
-                    <label>No. Telefon (ID Pengguna)</label>
-                    <input type="text" id="regUsername" placeholder="Contoh: 0176543210">
+                    <label>No. Telefon</label>
+                    <input type="text" id="regUser" placeholder="Contoh: 0123456789">
                 </div>
                 <div class="form-group">
                     <label>Bilangan Bahagian Korban Diikuti</label>
@@ -98,22 +111,22 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Cipta Kata Laluan Akaun</label>
-                    <input type="password" id="regPassword" placeholder="Cipta kata laluan">
+                    <label>Cipta Kata Laluan</label>
+                    <input type="password" id="regPass" placeholder="Cipta kata laluan anda">
                 </div>
-                <button onclick="prosesDaftarAkaun()" class="btn-reg-submit">Hantar & Daftar Akaun</button>
+                <button onclick="daftarAkaun()" class="btn-submit" style="background-color: var(--accent-color);">Hantar Pendaftaran</button>
             </div>
         </div>
 
-        <div id="appDashboardSection" style="display: none;">
+        <div id="appSection" style="display: none;">
             <div class="user-nav">
-                <div>Warga KRT TSCC: <strong id="namaSesiPengguna">...</strong> [<span id="jenisAksesTeks" style="font-weight:bold; color:var(--accent-color);">Peserta</span>]</div>
-                <button class="btn-logout" onclick="logKeluarSistem()">Log Keluar</button>
+                <div>Selamat Datang, <strong id="namaPengguna">...</strong> (<span id="aksesPengguna">Peserta</span>)</div>
+                <button class="btn-logout" onclick="logKeluar()">Log Keluar</button>
             </div>
 
-            <div id="boxAdminReset" style="display: none; background-color: #fee2e2; border: 1px solid #fca5a5; padding: 15px; border-radius: 8px; margin-bottom: 20px; justify-content: space-between; align-items: center;">
-                <div><strong style="color: #991b1b;">⚠️ KAWALAN ADMIN:</strong><p style="font-size: 0.85rem; color: #7f1d1d;">Padam bersih database untuk tahun baru.</p></div>
-                <button onclick="resetSistemSepenuhnya()" style="background-color:var(--danger-color); color:white; border:none; padding:8px 15px; font-weight:bold; border-radius:5px; cursor:pointer;">RESET ALL DATA</button>
+            <div id="adminResetBox" style="display: none; background: #fee2e2; padding: 15px; border-radius: 8px; margin-bottom: 20px; align-items: center; justify-content: space-between;">
+                <span style="color: #991b1b; font-weight: bold;">⚠️ Urusan Admin: Kosongkan database bagi tahun baru jika perlu.</span>
+                <button onclick="resetSistem()" style="background: var(--danger-color); color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-weight: bold;">RESET DATA</button>
             </div>
 
             <div class="intro-card">
@@ -127,234 +140,226 @@
             </div>
 
             <div class="dashboard">
-                <div class="stat-card"><h3>Rekod</h3><p id="total-peserta">0</p></div>
-                <div class="stat-card"><h3>Jumlah Bahagian</h3><p id="total-lembu">0</p></div>
-                <div class="stat-card"><h3>Telah Dibayar</h3><p style="color: var(--success-color);" id="total-bayar">RM 0.00</p></div>
-                <div class="stat-card"><h3>Baki Tunggakan</h3><p style="color: var(--accent-color);" id="total-baki">RM 0.00</p></div>
+                <div class="stat-card"><h3>Rekod</h3><p id="stat-peserta">0</p></div>
+                <div class="stat-card"><h3>Jumlah Bahagian</h3><p id="stat-bahagian">0</p></div>
+                <div class="stat-card"><h3>Telah Dibayar</h3><p style="color: var(--success-color);" id="stat-bayar">RM 0.00</p></div>
+                <div class="stat-card"><h3>Baki Tunggakan</h3><p style="color: var(--accent-color);" id="stat-baki">RM 0.00</p></div>
             </div>
 
             <div class="main-content">
-                <div class="form-section" id="boxBorangPendaftaran">
+                <div class="form-section" id="borangInputSeksi">
                     <h2>Borang Rekod Korban</h2>
                     <div class="form-group"><label>Nama Peserta (Niat)</label><input type="text" id="namaNiat"></div>
                     <div class="form-group"><label>No. Rujukan Resit</label><input type="text" id="resit"></div>
                     <div class="form-group"><label>Amaun Dibayar (RM)</label><input type="number" id="jumlahBayar" value="800"></div>
-                    <button onclick="prosesHantarRekod()" class="btn-submit">Simpan Rekod Pembayaran</button>
+                    <button onclick="hantarRekod()" class="btn-submit">Simpan Rekod Pembayaran</button>
                 </div>
 
-                <div class="list-section" id="boxJadualPaparan">
+                <div class="list-section" id="jadualSeksi">
                     <h2>Senarai Rekod Pendaftaran</h2>
                     <div style="overflow-x: auto;">
                         <table>
                             <thead>
-                                <tr><th>Niat / Peserta</th><th>Bahagian</th><th>Kos (RM)</th><th>Dibayar (RM)</th><th>Status</th><th id="thAdminAction" style="display:none;">Padam</th></tr>
+                                <tr><th>Niat / Peserta</th><th>Bahagian</th><th>Kos (RM)</th><th>Dibayar (RM)</th><th>Status</th><th id="thPadam" style="display:none;">Padam</th></tr>
                             </thead>
                             <tbody id="jadualBody"></tbody>
                         </table>
-                        <div id="emptyMessage" class="empty-msg" style="display:none;">Tiada sebarang rekod.</div>
+                        <div id="emptyMsg" class="empty-msg" style="display: none;">Tiada sebarang rekod ditemui.</div>
                     </div>
                 </div>
             </div>
         </div>
+
     </div>
 
     <script>
-        const DB_URL = "https://api.jsonbin.io/v3/b/6a0be261ee5a733b12e14189"; 
-        const MASTER_KEY = "$2a$10$NZfgT1Nwuo6UgbzD/xgb4OGT9Fc0yX6BVfJX6VvLS8JhVCdQrn5sO"; 
+        const DB_URL = "https://api.jsonbin.io/v3/b/6a0be261ee5a733b12e14189";
+        const MASTER_KEY = "$2a$10$NZfgT1Nwuo6UgbzD/xgb4OGT9Fc0yX6BVfJX6VvLS8JhVCdQrn5sO";
         
-        let s_user = null;
-        let global_db = { pengguna: {}, rekod: [] };
+        letcurrentUser = null;
+        let localData = { pengguna: {}, rekod: [] };
 
-        function tetapkanLoading(papar) {
-            let overlay = document.getElementById('loadingView');
-            if(overlay) overlay.style.display = papar ? 'flex' : 'none';
+        function tukarTab(jenis) {
+            document.getElementById('tabLogin').classList.toggle('active', jenis === 'login');
+            document.getElementById('tabRegister').classList.toggle('active', jenis === 'register');
+            document.getElementById('formLogin').style.display = jenis === 'login' ? 'block' : 'none';
+            document.getElementById('formRegister').style.display = jenis === 'register' ? 'block' : 'none';
         }
 
-        async function muatData() {
+        async function dapatkanDatabase() {
             try {
-                let r = await fetch(DB_URL + "/latest", {
+                let res = await fetch(DB_URL + "/latest", {
                     method: 'GET',
                     headers: { "X-Master-Key": MASTER_KEY, "X-Bin-Meta": "false" }
                 });
-                if (!r.ok) {
-                    global_db = { pengguna: {}, rekod: [] };
+                if(res.ok) {
+                    localData = await res.json();
+                    if(!localData.pengguna) localData.pengguna = {};
+                    if(!localData.rekod) localData.rekod = [];
                     return true;
                 }
-                let data = await r.json();
-                
-                // Pelindung keselamatan data korup/cacat
-                global_db = data ? data : { pengguna: {}, rekod: [] };
-                if (!global_db.pengguna || typeof global_db.pengguna !== 'object') global_db.pengguna = {};
-                if (!global_db.rekod || !Array.isArray(global_db.rekod)) global_db.rekod = [];
-                
-                return true;
-            } catch(e) {
-                console.log("Ralat muatData, bina struktur kosong alternatif:", e.message);
-                global_db = { pengguna: {}, rekod: [] };
-                return true; 
+            } catch (e) {
+                alert("Ralat sistem database: " + e.message);
             }
+            return false;
         }
 
-        async function simpanData() {
+        async function simpanDatabase() {
             try {
-                let r = await fetch(DB_URL, {
+                let res = await fetch(DB_URL, {
                     method: 'PUT',
-                    headers: { 'Content-Type': 'application/json', 'X-Master-Key': MASTER_KEY },
-                    body: JSON.stringify(global_db)
+                    headers: { "Content-Type": "application/json", "X-Master-Key": MASTER_KEY },
+                    body: JSON.stringify(localData)
                 });
-                return r.ok;
-            } catch(e) {
-                alert("Gagal simpan ke server: " + e.message);
+                return res.ok;
+            } catch (e) {
+                alert("Gagal mengemaskini data online: " + e.message);
                 return false;
             }
         }
 
-        async function prosesDaftarAkaun() {
-            try {
-                let nama = document.getElementById('regNama').value.trim();
-                let username = document.getElementById('regUsername').value.trim();
-                let bahagian = parseInt(document.getElementById('regBahagian').value) || 1;
-                let kataLuan = document.getElementById('regPassword').value.trim();
+        async function daftarAkaun() {
+            let nama = document.getElementById('regNama').value.trim();
+            let user = document.getElementById('regUser').value.trim();
+            let bahagian = parseInt(document.getElementById('regBahagian').value) || 1;
+            let pass = document.getElementById('regPass').value.trim();
 
-                if (!nama || !username || !kataLuan) {
-                    alert("Sila isi semua ruang pendaftaran!");
-                    return;
-                }
+            if(!nama || !user || !pass) { alert("Sila isi maklumat borang dengan lengkap!"); return; }
 
-                tetapkanLoading(true);
-                await muatData(); 
+            document.getElementById('loadingAuth').style.display = 'block';
+            let sedia = await dapatkanDatabase();
+            
+            if(!sedia) { document.getElementById('loadingAuth').style.display = 'none'; return; }
 
-                if (global_db.pengguna[username]) {
-                    alert("No. telefon ini sudah terdaftar!");
-                    tetapkanLoading(false);
-                    return;
-                }
+            if(localData.pengguna[user]) {
+                alert("No. telefon ini telah pun berdaftar!");
+                document.getElementById('loadingAuth').style.display = 'none';
+                return;
+            }
 
-                global_db.pengguna[username] = { nama: nama, username: username, kataLuan: kataLuan, bahagian: bahagian, role: "peserta" };
-                
-                let jaya = await simpanData();
-                tetapkanLoading(false);
+            localData.pengguna[user] = { nama: nama, user: user, pass: pass, bahagian: bahagian, role: "peserta" };
+            
+            let jaya = await simpanDatabase();
+            document.getElementById('loadingAuth').style.display = 'none';
 
-                if (jaya) {
-                    alert("Alhamdulillah, Akaun Berjaya Didaftarkan!\n\nSila guna borang atas untuk Log Masuk menggunakan No. Telefon & Kata Laluan anda.");
-                    document.getElementById('regNama').value = '';
-                    document.getElementById('regUsername').value = '';
-                    document.getElementById('regPassword').value = '';
-                } else {
-                    alert("Gagal menyimpan akaun baru ke database.");
-                }
-            } catch (err) {
-                tetapkanLoading(false);
-                alert("Ralat Sistem Pendaftaran: " + err.message);
+            if(jaya) {
+                alert("Alhamdulillah, Pendaftaran Berjaya! Anda kini boleh klik 'Log Masuk'.");
+                document.getElementById('regNama').value = '';
+                document.getElementById('regUser').value = '';
+                document.getElementById('regPass').value = '';
+                tukarTab('login');
             }
         }
 
-        async function prosesLogMasuk() {
-            try {
-                let username = document.getElementById('loginUsername').value.trim();
-                let kataLuan = document.getElementById('loginPassword').value.trim();
+        async function logMasuk() {
+            let user = document.getElementById('loginUser').value.trim();
+            let pass = document.getElementById('loginPass').value.trim();
 
-                if (!username || !kataLuan) {
-                    alert("Sila masukkan No. Telefon dan Kata Laluan!");
-                    return;
-                }
+            if(!user || !pass) { alert("Sila masukkan No. Telefon & Kata Laluan!"); return; }
 
-                if (username === 'admin' && kataLuan === 'admin') {
-                    s_user = { nama: "Urus Setia KRT TSCC", username: "admin", role: "admin" };
-                    tetapkanLoading(true);
-                    await muatData();
-                    tetapkanLoading(false);
-                    bukaDashboard();
-                    return;
-                }
+            if(user === 'admin' && pass === 'admin') {
+                letcurrentUser = { nama: "Urus Setia KRT TSCC", user: "admin", role: "admin" };
+                document.getElementById('loadingAuth').style.display = 'block';
+                await dapatkanDatabase();
+                document.getElementById('loadingAuth').style.display = 'none';
+                bukaDashboard();
+                return;
+            }
 
-                tetapkanLoading(true);
-                await muatData();
-                tetapkanLoading(false);
+            document.getElementById('loadingAuth').style.display = 'block';
+            let sedia = await dapatkanDatabase();
+            document.getElementById('loadingAuth').style.display = 'none';
 
-                if (global_db.pengguna[username] && global_db.pengguna[username].kataLuan === kataLuan) {
-                    s_user = global_db.pengguna[username];
-                    bukaDashboard();
-                } else {
-                    alert("No. Telefon atau Kata Laluan anda salah!");
-                }
-            } catch (err) {
-                tetapkanLoading(false);
-                alert("Ralat Sistem Log Masuk: " + err.message);
+            if(!sedia) return;
+
+            if(localData.pengguna[user] && localData.pengguna[user].pass === pass) {
+                letcurrentUser = localData.pengguna[user];
+                bukaDashboard();
+            } else {
+                alert("No. Telefon atau Kata Laluan adalah SALAH!");
             }
         }
 
         function bukaDashboard() {
-            if (!s_user) return;
-            
-            document.getElementById('authSectionArea').style.display = 'none';
-            document.getElementById('appDashboardSection').style.display = 'block';
-            document.getElementById('namaSesiPengguna').innerText = s_user.nama;
+            document.getElementById('authSection').style.display = 'none';
+            document.getElementById('appSection').style.display = 'block';
+            document.getElementById('namaPengguna').innerText = letcurrentUser.nama;
 
-            if (s_user.role === 'admin') {
-                document.getElementById('jenisAksesTeks').innerText = 'Admin / Urus Setia';
-                document.getElementById('boxBorangPendaftaran').style.display = 'none';
-                document.getElementById('boxJadualPaparan').style.gridColumn = 'span 2';
-                document.getElementById('boxAdminReset').style.display = 'flex';
-                document.getElementById('thAdminAction').style.display = 'table-cell';
+            if(letcurrentUser.role === 'admin') {
+                document.getElementById('aksesPengguna').innerText = "Admin Urus Setia";
+                document.getElementById('borangInputSeksi').style.display = 'none';
+                document.getElementById('jadualSeksi').style.gridColumn = 'span 2';
+                document.getElementById('adminResetBox').style.display = 'flex';
+                document.getElementById('thPadam').style.display = 'table-cell';
             } else {
-                document.getElementById('jenisAksesTeks').innerText = 'Peserta Korban';
-                document.getElementById('boxBorangPendaftaran').style.display = 'block';
-                document.getElementById('boxJadualPaparan').style.gridColumn = 'span 1';
-                document.getElementById('boxAdminReset').style.display = 'none';
-                document.getElementById('thAdminAction').style.display = 'none';
+                document.getElementById('aksesPengguna').innerText = "Peserta Korban";
+                document.getElementById('borangInputSeksi').style.display = 'block';
+                document.getElementById('jadualSeksi').style.gridColumn = 'span 1';
+                document.getElementById('adminResetBox').style.display = 'none';
+                document.getElementById('thPadam').style.display = 'none';
             }
             binaJadual();
         }
 
         function binaJadual() {
-            if (!s_user) return;
-            
             let tbody = document.getElementById('jadualBody');
-            if(!tbody) return;
             tbody.innerHTML = '';
-            
-            let tPeserta = 0, tBahagian = 0, tBayarKeseluruhan = 0, ada = false;
 
-            if (s_user.role === 'admin') {
-                tPeserta = Object.keys(global_db.pengguna).length;
-                for (let key in global_db.pengguna) {
-                    tBahagian += parseInt(global_db.pengguna[key].bahagian) || 1;
+            let totalPeserta = 0, totalBahagian = 0, totalBayar = 0, adaData = false;
+
+            if(letcurrentUser.role === 'admin') {
+                totalPeserta = Object.keys(localData.pengguna).length;
+                for(let key in localData.pengguna) {
+                    totalBahagian += parseInt(localData.pengguna[key].bahagian) || 1;
                 }
             } else {
-                tPeserta = 1;
-                tBahagian = parseInt(s_user.bahagian) || 1;
+                totalPeserta = 1;
+                totalBahagian = parseInt(letcurrentUser.bahagian) || 1;
             }
 
-            let petaBayaranUser = {};
-            global_db.rekod.forEach(function(r) {
-                if(r && r.pendaftarPhone) {
-                    let amaun = parseFloat(r.jumlahBayar) || 0;
-                    if (!petaBayaranUser[r.pendaftarPhone]) petaBayaranUser[r.pendaftarPhone] = 0;
-                    petaBayaranUser[r.pendaftarPhone] += amaun;
-                    
-                    if (s_user.role === 'admin' || r.pendaftarPhone === s_user.username) {
-                        tBayarKeseluruhan += amaun;
-                    }
+            let kiraBayarUser = {};
+            localData.rekod.forEach(r => {
+                let amaun = parseFloat(r.jumlahBayar) || 0;
+                if(!kiraBayarUser[r.pendaftarPhone]) kiraBayarUser[r.pendaftarPhone] = 0;
+                kiraBayarUser[r.pendaftarPhone] += amaun;
+
+                if(letcurrentUser.role === 'admin' || r.pendaftarPhone === letcurrentUser.user) {
+                    totalBayar += amaun;
                 }
             });
 
-            global_db.rekod.forEach(function(r, i) {
-                if (!r || (s_user.role !== 'admin' && r.pendaftarPhone !== s_user.username)) return;
-                ada = true;
+            localData.rekod.forEach((r, index) => {
+                if(letcurrentUser.role !== 'admin' && r.pendaftarPhone !== letcurrentUser.user) return;
+                adaData = true;
 
-                let bahagianAsalUser = 1;
-                if (global_db.pengguna[r.pendaftarPhone]) {
-                    bahagianAsalUser = parseInt(global_db.pengguna[r.pendaftarPhone].bahagian) || 1;
+                let bahagianUser = 1;
+                if(localData.pengguna[r.pendaftarPhone]) {
+                    bahagianUser = parseInt(localData.pengguna[r.pendaftarPhone].bahagian) || 1;
                 }
 
-                let totalKosUser = bahagianAsalUser * 800;
-                let totalDahBayarUser = petaBayaranUser[r.pendaftarPhone] || 0;
-                let bakiUser = totalKosUser - totalDahBayarUser;
-                if(bakiUser < 0) bakiUser = 0;
+                let kosWajib = bahagianUser * 800;
+                let sudahBayar = kiraBayarUser[r.pendaftarPhone] || 0;
+                let baki = kosWajib - sudahBayar;
+                if(baki < 0) baki = 0;
 
-                let statusTeks = bakiUser <= 0 ? '<span class="status-lunas">LUNAS</span>' : '<span class="status-baki">Baki: RM '+bakiUser+'</span>';
-                let nama = s_user.role === 'admin' ? '<strong>'+r.namaNiat+'</strong><br><small>Oleh: '+r.pendaftarNama+' ('+r.pendaftarPhone+')</small>' : '<strong>'+r.namaNiat+'</strong>';
-                let aksi = s_user.role === 'admin' ? '<td><button onclick="padamRekod('+i+')" style="background:red; color:white; border:none; padding:2px 5px; cursor:pointer;">X</button></td>' : '';
+                let statusLabel = baki <= 0 ? '<span class="status-lunas">LUNAS</span>' : '<span class="status-baki">Baki: RM ' + baki + '</span>';
+                let namaKolum = letcurrentUser.role === 'admin' ? '<strong>' + r.namaNiat + '</strong><br><small>Oleh: ' + r.pendaftarNama + ' (' + r.pendaftarPhone + ')</small>' : '<strong>' + r.namaNiat + '</strong>';
+                let aksiKolum = letcurrentUser.role === 'admin' ? '<td><button onclick="padamRekod(' + index + ')" style="background:red; color:white; border:none; padding:2px 6px; cursor:pointer; border-radius:3px;">X</button></td>' : '';
 
-                tbody.innerHTML += '<tr><t
+                tbody.innerHTML += '<tr><td>' + namaKolum + '</td><td>' + bahagianUser + '</td><td>' + kosWajib.toFixed(2) + '</td><td>' + (parseFloat(r.jumlahBayar) || 0).toFixed(2) + '</td><td>' + statusLabel + '</td>' + aksiKolum + '</tr>';
+            });
+
+            let totalKosWajib = totalBahagian * 800;
+            let totalBakiTunggakan = totalKosWajib - totalBayar;
+            if(totalBakiTunggakan < 0) totalBakiTunggakan = 0;
+
+            document.getElementById('emptyMsg').style.display = adaData ? 'none' : 'block';
+            document.getElementById('stat-peserta').innerText = totalPeserta;
+            document.getElementById('stat-bahagian').innerText = totalBahagian;
+            document.getElementById('stat-bayar').innerText = 'RM ' + totalBayar.toFixed(2);
+            document.getElementById('stat-baki').innerText = 'RM ' + totalBakiTunggakan.toFixed(2);
+        }
+
+        async function hantarRekod() {
+            let niat = document.getElementById('namaNiat').value.trim();
+            let resit = document.getElementById('resit').value
